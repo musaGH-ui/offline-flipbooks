@@ -4,7 +4,8 @@ export default defineConfig({
   root: './',
   base: './', 
   build: {
-    outDir: 'dist'
+    outDir: 'dist',
+	emptyOutDir: true
   },
   server: {
     watch: {

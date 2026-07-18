@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "identifier": "com.dos.flipbook",
   "build": {
-    "frontendDist": ".",
+    "frontendDist": "../dist",
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build"
   },
