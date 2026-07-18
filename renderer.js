@@ -338,11 +338,27 @@ async function initFlipbook() {
             loadingProgress.innerText = progressPercent;
         }
     }
+	// 1. Ekranın o anki kullanılabilir temiz genişlik ve yüksekliğini alalım
+	// Tauri/Electron pencere kenarlıklarını düşmek için %80 (0.8) ile çarpıyoruz
+	const targetWidth = window.innerWidth * 0.8;
+	const targetHeight = window.innerHeight * 0.8;
 
+	// 2. Sayfanızın orijinal en-boy oranını korumak çok önemlidir.
+	// Örneğin kitabınız A4 veya standart bir dikey kitap formatındaysa (En / Boy oranı genelde ~0.75'tir)
+	const aspectRatio = 550 / 733; 
+
+	let finalWidth = targetWidth;
+	let finalHeight = targetWidth / aspectRatio;
+
+	// Eğer hesaplanan yükseklik, ekran yüksekliğini aşıyorsa yüksekliğe göre daraltalım
+	if (finalHeight > targetHeight) {
+		finalHeight = targetHeight;
+		finalWidth = targetHeight * aspectRatio;
+	}
     // 🌟 ARTIK HARFLER %100 KUSURSUZ ÇİZİLDİ! Şimdi kütüphaneyi güvenle ayağa kaldırabiliriz.
     pageFlipInstance = new St.PageFlip(container, {
-        width: pageWidth,
-        height: pageHeight,
+        width: Math.round(finalWidth / 2),  // Kütüphane iki sayfa açtığı için genişliği ikiye bölüyoruz
+        height: Math.round(finalHeight),
         size: "fixed",
         minWidth: pageWidth,
         minHeight: pageHeight,
@@ -862,3 +878,24 @@ function deleteBookmark(pageIndex) {
     renderBookmarksList();
 }
 
+window.addEventListener('resize', () => {
+    const updatedWidth = window.innerWidth * 0.8;
+    const updatedHeight = window.innerHeight * 0.8;
+    
+    let newWidth = updatedWidth;
+    let newHeight = updatedWidth / aspectRatio;
+    
+    if (newHeight > updatedHeight) {
+        newHeight = updatedHeight;
+        newWidth = updatedHeight * aspectRatio;
+    }
+    
+    // page-flip kütüphanesinin kendi update fonksiyonunu çağırıyoruz
+    pageFlip.updateFromHtml(); 
+    // Eğer kütüphane otomatik update etmezse, kapsayıcının stilini de elle güncelleyebilirsiniz:
+    const container = document.getElementById("flipbook-container");
+    if(container) {
+        container.style.width = `${Math.round(newWidth)}px`;
+        container.style.height = `${Math.round(newHeight)}px`;
+    }
+});
