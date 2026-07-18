@@ -1,0 +1,53 @@
+name: "Tauri Dağıtım Derlemesi"
+
+on:
+  push:
+    tags:
+      - 'v*' # v1.0.0 gibi bir versiyon etiketi gönderildiğinde tetiklenir
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos-latest, ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Kodu Klonla
+        uses: actions/checkout@v4
+
+      - name: Node.js Kurulumu
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Rust Kurulumu
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust Önbellekleme (Hız İçin)
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Linux Ön Gereksinimlerini Kur (Sadece Ubuntu İçin)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+
+      - name: Node Bağımlılıklarını Kur
+        run: npm install
+
+      - name: Tauri Uygulamasını Derle
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.TAURI_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "DOS Flipbook ${{ github.ref_name }}"
+          releaseBody: "Bulutta otomatik olarak üretilen kararlı masaüstü sürümleri."
+          releaseDraft: false
+          prerelease: false

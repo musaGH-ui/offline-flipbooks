@@ -1,0 +1,13 @@
+# Bağımlılıklar (Asla GitHub'a gönderilmez, npm install ile kurulur)
+node_modules/
+
+# Derleme Çıktıları (Electron dist klasörü veya Tauri target klasörü)
+dist/
+src-tauri/target/
+
+# İşletim sistemi ve editör kalıntıları
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+npm-debug.log*

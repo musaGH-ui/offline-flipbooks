@@ -1,0 +1,29 @@
+{
+  "name": "my-electron-app",
+  "version": "1.0.0",
+  "description": "pdf dosyalardan faydalanarak çeşitli işletim sistemi ortamlarında görüntülenebilecek çalıştırılabilir flipbook'lar üretir. ",
+  "keywords": [
+    "flipbook"
+  ],
+  "license": "MIT",
+  "author": "musa",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "electron .",
+    "tauri": "tauri",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.1.0",
+    "electron": "^42.5.0",
+    "vite": "^8.1.0"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.1.0",
+    "page-flip": "^2.0.7",
+    "pdfjs-dist": "^6.1.200"
+  }
+}

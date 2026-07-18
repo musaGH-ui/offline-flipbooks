@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF Flipbook Maker</title>
+    <link rel="stylesheet" href="/css/pdf_viewer.css">
+    <link rel="stylesheet" href="/css/style.css">
+	<link rel="stylesheet" href="css/all.min.css">
+</head>
+<body>
+	<div class="brand-header-container">
+		<a href="https://dosdijitalyayincilik.com" target="_blank" class="brand-logo-wrapper" title="DOS Dijital Yayıncılık Web Sitesi">
+			<img src="/images/Logo_512x800-Photoroom.png" alt="DOS Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+			<div class="logo-fallback" style="display: none;"><i class="fa-solid fa-cubes"></i></div>
+		</a>
+	</div>
+	<div class="custom-toolbar">
+		<button id="btn-prev" title="Önceki Sayfa"><i class="fas fa-chevron-left"></i></button>
+		<button id="btn-next" title="Sonraki Sayfa"><i class="fas fa-chevron-right"></i></button>
+		
+		<span class="toolbar-divider"></span>
+    
+		<div class="page-counter">
+			<span id="current-page">1</span> / <span id="total-pages">10</span>
+		</div>
+
+		<span class="toolbar-divider"></span>
+
+		<button id="btn-zoom-in" title="Büyüt"><i class="fas fa-search-plus"></i></button>
+		<button id="btn-zoom-out" title="Küçült"><i class="fas fa-search-minus"></i></button>
+		<button id="btn-fullscreen" title="Tam Ekran"><i class="fas fa-expand"></i></button>
+
+		<span class="toolbar-divider"></span>
+
+		<button id="btn-select-text" title="Metin Seç"><i class="fas fa-mouse-pointer"></i></button>
+		<button id="btn-add-bookmark" title="Bookmark Ekle"><i class="far fa-bookmark"></i></button>
+		<button id="btn-print" title="Yazdır"><i class="fas fa-print"></i></button>
+	</div>
+    <div class="app-container">
+    
+		<div class="panel-trigger-buttons">
+			<button id="btn-toggle-thumbnails" class="panel-header-btn">
+				<i class="fas fa-th-large"></i> Sayfalar
+			</button>
+			<button id="btn-toggle-search" class="panel-header-btn">
+				<i class="fas fa-search"></i> Ara
+			</button>
+			<button id="btn-toggle-bookmarks" class="panel-header-btn">
+				<i class="fa-solid fa-star"></i> İmler
+			</button>
+			<button id="btn-toggle-shop" class="panel-header-btn" title="Mağaza">
+				<i class="fa-solid fa-bag-shopping"></i> <span>Katalog</span>
+			</button>
+		</div>
+    
+		<div id="sidebar-container" class="sidebar-hidden" style="display: none !important;">
+			<h3>Sayfalar</h3>
+			<div id="thumbnails-list"></div>
+		</div>
+
+		<div id="search-sidebar-container" class="sidebar-hidden" style="display: none !important;">
+			<h3>Terim Ara</h3>
+			<div class="search-input-wrapper">
+				<input type="text" id="txt-search-term" placeholder="Terimi yazın..." />
+				<button id="btn-do-search">Ara</button>
+			</div>
+			<div id="search-results-container">
+				<h4>Sonuçlar (<span id="search-results-count">0</span>)</h4>
+				<ul id="search-results-list"></ul>
+			</div>
+		</div>
+		<div id="bookmarks-sidebar-container" class="sidebar-hidden">
+			<h3>Yer İmleri</h3>
+			<div id="bookmarks-list-wrapper">
+				<ul id="bookmarks-list">
+					</ul>
+			</div>
+		</div>
+		<div id="shop-sidebar-container" class="sidebar-hidden" style="display: none !important;">
+			<h3>Katalog</h3>
+			<div id="shop-list-wrapper">
+				<ul id="shop-list"></ul>
+			</div>
+		</div>
+		<div class="main-content">
+			<div id="pdf-loading-screen">
+				<div class="pdf-loader-spinner"></div>
+				<div id="pdf-loading-text">PDF sayfaları işleniyor: <span id="pdf-loading-progress">0</span>%</div>
+			</div>
+			<div id="flipbook-container" class="flipbook"></div>
+		</div>
+</div>
+
+    <script src="/js/pdf.min.mjs" type="module"></script>
+    <script src="/js/page-flip.browser.js"></script>
+    <script type="module" src="./renderer.js"></script>
+</body>
+</html>
