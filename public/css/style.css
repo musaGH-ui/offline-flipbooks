@@ -2,10 +2,14 @@ body, html {
     margin: 0;
     padding: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;
+	overflow: hidden;
+	display: flex;
+	justify-content: center;
+	align-items: center;
     font-family: Arial, sans-serif;
-    background-color: #333;
-    overflow: hidden;
+    background-color: #f5f5f5;
+    
 }
 body {
 	background: url("../images/arka_plan.jpg") no-repeat center center fixed !important;
@@ -142,9 +146,11 @@ body {
     opacity: 1 !important;
 }
 
-#flipbook-container {
-    max-width: 80vw;  /* Ekran genişliğinin %80'ini geçmesin */
-    max-height: 80vh; /* Ekran yüksekliğinin %85'ini geçmesin */
+#flipbook-container,.page-flip {
+    max-width: 95vw;  /* Ekran genişliğinin %80'ini geçmesin */
+    max-height: 90vh; /* Ekran yüksekliğinin %85'ini geçmesin */
+	width: 100%;
+	height: 100%;
 	/* 🌟 ZOOM İÇİN KRİTİK: scale() ile büyütme yaparken tarayıcının 
        scroll-bar hesaplarını doğru yapabilmesi için orijini merkeze kilitliyoruz */
     transform-origin: center center;
