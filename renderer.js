@@ -340,12 +340,12 @@ async function initFlipbook() {
     }
 	// 1. Ekranın o anki kullanılabilir temiz genişlik ve yüksekliğini alalım
 	// Tauri/Electron pencere kenarlıklarını düşmek için %80 (0.8) ile çarpıyoruz
-	const targetWidth = window.innerWidth * 0.8;
+	const targetWidth = window.innerWidth * 0.9;
 	const targetHeight = window.innerHeight * 0.8;
 
 	// 2. Sayfanızın orijinal en-boy oranını korumak çok önemlidir.
 	// Örneğin kitabınız A4 veya standart bir dikey kitap formatındaysa (En / Boy oranı genelde ~0.75'tir)
-	const aspectRatio = 550 / 733; 
+	const aspectRatio = 1.3; 
 
 	let finalWidth = targetWidth;
 	let finalHeight = targetWidth / aspectRatio;
@@ -879,7 +879,8 @@ function deleteBookmark(pageIndex) {
 }
 
 window.addEventListener('resize', () => {
-    const updatedWidth = window.innerWidth * 0.8;
+	const aspectRatio = 1.3;
+    const updatedWidth = window.innerWidth * 0.9;
     const updatedHeight = window.innerHeight * 0.8;
     
     let newWidth = updatedWidth;
