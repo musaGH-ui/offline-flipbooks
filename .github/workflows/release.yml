@@ -45,12 +45,13 @@ jobs:
         shell: bash
         run: |
           # 1. Projedeki docs/ klasöründen tek olan PDF'in adını uzantısız yakala
-          # Eğer klasör boşsa veya hata varsa fallback olarak tag ismini temizle
-          RAW_NAME=$(basename "$(ls docs/*.pdf | head -n 1)" .pdf)
-          if [ -z "$RAW_NAME" ] || [ "$RAW_NAME" == "*.pdf" ]; then
-            PDF_NAME="DOS_Flipbook_${{ github.ref_name }}"
+          # Karakter uyumsuzluklarını önlemek için dosya adındaki boşlukları ve özel karakterleri temizliyoruz
+          RAW_NAME=$(basename "$(ls docs/*.pdf | head -n 1 2>/dev/null)" .pdf)
+          if [ -z "$RAW_NAME" ] || [ "$RAW_NAME" == "*.pdf" ] || [ "$RAW_NAME" == "" ]; then
+            PDF_NAME="DOS-Flipbook"
           else
-            PDF_NAME="$RAW_NAME"
+            # Dosya adındaki yasadışı veya kararsız karakterleri temizle
+            PDF_NAME=$(echo "$RAW_NAME" | sed 's/[^a-zA-O-Z0-9_-]//g')
           fi
           echo "Yakalanan E-Kitap Adı: $PDF_NAME"
           
