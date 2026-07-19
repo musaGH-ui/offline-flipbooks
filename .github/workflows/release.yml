@@ -87,6 +87,10 @@ jobs:
         env:
           ENV_PDF_NAME: ${{ github.ref_name }} # Fallback riskine karşı tag ismini veya dinamik adı çevre değişkeni olarak bağlarız
           ENV_UNIQUE_ID: "com.dos.flipbook.default"
+      
+        # Tauri derlemeden hemen önce eğer bir build betiğiniz varsa tetikler
+      - name: Frontend Projesini Derle
+        run: npm run build --if-present
         
       - name: Tauri Uygulamasını Derle
         uses: tauri-apps/tauri-action@v0

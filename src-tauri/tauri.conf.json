@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "identifier": "com.dos.flipbook.default",
   "build": {
-    "frontendDist": "../dist", 
+    "frontendDist": "../", 
     "devUrl": "http://localhost:5173"
   },
   "app": {
