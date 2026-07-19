@@ -40,7 +40,36 @@ jobs:
 
       - name: Node Bağımlılıklarını Kur
         run: npm install
-
+        
+        - name: Dinamik Uygulama İsmi ve Kimliği Ayarla
+        run: |
+          # 1. Projedeki PDF dosyasının adını uzantısız olarak yakala
+          PDF_NAME=$(basename "docs/"*.pdf .pdf)
+          echo "Yakalanan E-Kitap Adı: $PDF_NAME"
+          
+          # 2. Windows kurulum çakışmasını önlemek için rastgele/benzersiz bir App ID üret
+          UNIQUE_ID="com.dos.flipbook.$(echo -n "$PDF_NAME" | md5sum | cut -d' ' -f1)"
+          
+          # 3. tauri.conf.json dosyasını Node.js ile dinamik olarak güncelle
+          node -e "
+            const fs = require('fs');
+            const conf = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8'));
+            
+            // Uygulama ve Kurulum Paket İsmini Değiştir
+            conf.package.productName = process.env.PDF_NAME;
+            conf.tauri.bundle.identifier = process.env.UNIQUE_ID;
+            
+            // Pencere Başlığını Değiştir
+            if(conf.tauri.windows && conf.tauri.windows[0]) {
+              conf.tauri.windows[0].title = process.env.PDF_NAME;
+            }
+            
+            fs.writeFileSync('src-tauri/tauri.conf.json', JSON.stringify(conf, null, 2));
+          "
+        env:
+          PDF_NAME: ${{ steps.get_name.outputs.pdf_name || 'HUKUK DAVA REHBERLERİ SERİSİ' }} # Yedek isim
+          # Not: Üstteki betiğin PDF adını düzgün okuması için docs/ klasöründe tek bir PDF olmalıdır.
+        
       - name: Tauri Uygulamasını Derle
         uses: tauri-apps/tauri-action@v0
         env:

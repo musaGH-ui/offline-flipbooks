@@ -1,5 +1,8 @@
 import { PageFlip } from "page-flip";
 import * as pdfjsLib from "pdfjs-dist";
+// 1. Yeni Tauri v2 standardına göre pencere modüllerini içe aktarıyoruz
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { LogicalSize } from "@tauri-apps/api/window";
 
 // PDF.js v4+ Modül yapısı uyumluluk köprüsü
 /*if (pdfjsLib && !pdfjsLib.TextLayer) {
@@ -20,10 +23,45 @@ const pdfUrl = `./docs/ABONELİK SÖZLEŞMESİNDEN KAYNAKLANAN ALACAK DAVALARI_c
 let currentSearchTerm = "";
 const pageRenderLocks = {}; // Mükerrer render isteklerini engelleme kilidi
 
+async function setResponsiveWindow() {
+    try {
+        // 1. Tauri ortamında olup olmadığımızı kontrol eden pürüzsüz kalkan
+        if (typeof window === 'undefined' || !window.__TAURI_INTERNALS__) {
+            console.log("Uygulama Tauri dışı bir ortamda (Electron/Tarayıcı) çalışıyor, pencere boyutlandırma atlandı.");
+            return; // Tauri yoksa fonksiyonu güvenle sonlandır, hata fırlatma
+        }
+
+        // 2. Aktif pencere nesnesini çağırıyoruz (Sadece gerçek Tauri ortamında çalışır)
+        const appWindow = getCurrentWindow();
+        
+        const screenWidth = window.screen.width;
+        const screenHeight = window.screen.height;
+
+        const newWidth = Math.round(screenWidth * 0.85); 
+        const newHeight = Math.round(screenHeight * 0.85); 
+
+        // Pencereyi yeni boyuta getir ve ortala
+        await appWindow.setSize(new LogicalSize(newWidth, newHeight));
+        await appWindow.center();
+    } catch (err) {
+        console.error("Tauri pencere ayarı yapılırken hata oluştu:", err);
+    }
+}
+
+// Uygulama yüklenir yüklenmez çalıştır
+//setResponsiveWindow();
+
 // =========================================================================
 // 1. UYGULAMA BAŞLANGICI VE PANEL YÖNETİMİ
 // =========================================================================
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async() => {
+	// 🌟 ÖNCE pencerenin responsive olarak ekrana oturmasını KESİN olarak bekliyoruz
+    try {
+        // Pencerenin oturmasını kesin olarak bekliyoruz (Tek satır olarak)
+        await setResponsiveWindow();
+    } catch (windowError) {
+        console.error("Pencere boyutlandırılırken hata:", windowError);
+    }
     // Tarayıcı zoom'unu bozmadan her şeyi orijinal piksellerinde (%100) bırakıyoruz
     loadPDF(pdfUrl);
     
@@ -207,9 +245,22 @@ window.addEventListener('DOMContentLoaded', () => {
                         <li class="shop-item">
                             <img src="${imagePath}" alt="${title}" class="shop-item-cover" onerror="this.src='./images/Logo_512x800-Photoroom.png';">
                             <div class="shop-item-details">
-                                <span class="shop-item-title">${title}</span>
-                                <a href="${link}" target="_blank" class="btn-buy-now">İncele</a>
-                            </div>
+								<span class="shop-item-title">${title}</span>
+								<!-- 🌟 HİBRİT BUTON: Ortamı algılayarak hem Electron'da hem Tauri'de tarayıcıyı tetikler -->
+								<a href="#" onclick="
+									if (window.__TAURI__ && window.__TAURI__.shell) {
+										window.__TAURI__.shell.open('${link}');
+									} else if (window.require) {
+										// Electron ortamı için harici tarayıcı tetikleyicisi
+										const { shell } = window.require('electron');
+										shell.openExternal('${link}');
+									} else {
+										// Tarayıcı veya fallback ortamı için varsayılan açılış
+										window.open('${link}', '_blank');
+									}
+									return false;
+								" class="btn-buy-now">İncele</a>
+							</div>
                         </li>
                     `;
                 }
@@ -340,12 +391,12 @@ async function initFlipbook() {
     }
 	// 1. Ekranın o anki kullanılabilir temiz genişlik ve yüksekliğini alalım
 	// Tauri/Electron pencere kenarlıklarını düşmek için %80 (0.8) ile çarpıyoruz
-	const targetWidth = window.innerWidth * 0.9;
-	const targetHeight = window.innerHeight * 0.8;
+	const targetWidth = window.innerWidth * 0.95;
+	const targetHeight = window.innerHeight * 0.85;
 
 	// 2. Sayfanızın orijinal en-boy oranını korumak çok önemlidir.
 	// Örneğin kitabınız A4 veya standart bir dikey kitap formatındaysa (En / Boy oranı genelde ~0.75'tir)
-	const aspectRatio = 1.3; 
+	const aspectRatio = 1.45; 
 
 	let finalWidth = targetWidth;
 	let finalHeight = targetWidth / aspectRatio;
@@ -360,15 +411,20 @@ async function initFlipbook() {
         width: Math.round(finalWidth / 2),  // Kütüphane iki sayfa açtığı için genişliği ikiye bölüyoruz
         height: Math.round(finalHeight),
         size: "fixed",
-        minWidth: pageWidth,
-        minHeight: pageHeight,
-        maxWidth: pageWidth,
-        maxHeight: pageHeight,
+        minWidth: 200,
+        minHeight: 300,
+        maxWidth: 2000,
+        maxHeight: 2000,
         drawShadow: true,
         showCover: true 
     });
 
-    pageFlipInstance.loadFromHTML(document.querySelectorAll('.page-container'));
+    //pageFlipInstance.loadFromHTML(document.querySelectorAll('.page-container'));
+	// 🌟 GÜVENLİ KURULUM: Elementlerin DOM'a tam oturduğundan emin oluyoruz
+	const allRenderedPages = document.querySelectorAll('.page-container');
+	if (allRenderedPages && allRenderedPages.length > 0) {
+		pageFlipInstance.loadFromHTML(allRenderedPages);
+	}
     
 	// 🌟 SİHİRLİ GEÇİŞ ANI: Render ve kütüphane kurulumu bitti!
     setTimeout(() => {
@@ -409,9 +465,17 @@ async function initFlipbook() {
     const btnNext = document.getElementById('btn-next');
     let zoomLevel = 1;
     
-    btnNext.addEventListener('click', () => { pageFlipInstance.flipNext(); });
-    btnPrev.addEventListener('click', () => { pageFlipInstance.flipPrev(); });
-    
+    //btnNext.addEventListener('click', () => { pageFlipInstance.flipNext(); });
+    //btnPrev.addEventListener('click', () => { pageFlipInstance.flipPrev(); });
+    document.getElementById("btn-next").addEventListener("click", (e) => {
+		e.preventDefault(); // 🌟 Zıplamayı önleyen kritik satır
+		pageFlipInstance.flipNext();
+	});
+	document.getElementById("btn-prev").addEventListener("click", (e) => {
+		e.preventDefault(); // 🌟 Zıplamayı önleyen kritik satır
+		pageFlipInstance.flipPrev();
+	});
+	
     const flipbookContainer = document.getElementById('flipbook-container');
 	const mainContentArea = document.querySelector('.main-content');
     document.getElementById('btn-zoom-in').addEventListener('click', () => {
@@ -879,9 +943,9 @@ function deleteBookmark(pageIndex) {
 }
 
 window.addEventListener('resize', () => {
-	const aspectRatio = 1.3;
-    const updatedWidth = window.innerWidth * 0.9;
-    const updatedHeight = window.innerHeight * 0.8;
+	const aspectRatio = 1.45;
+    const updatedWidth = window.innerWidth * 0.95;
+    const updatedHeight = window.innerHeight * 0.85;
     
     let newWidth = updatedWidth;
     let newHeight = updatedWidth / aspectRatio;
@@ -890,13 +954,23 @@ window.addEventListener('resize', () => {
         newHeight = updatedHeight;
         newWidth = updatedHeight * aspectRatio;
     }
-    
-    // page-flip kütüphanesinin kendi update fonksiyonunu çağırıyoruz
-    pageFlip.updateFromHtml(); 
-    // Eğer kütüphane otomatik update etmezse, kapsayıcının stilini de elle güncelleyebilirsiniz:
-    const container = document.getElementById("flipbook-container");
-    if(container) {
-        container.style.width = `${Math.round(newWidth)}px`;
-        container.style.height = `${Math.round(newHeight)}px`;
+	
+	
+    // 1. ÖNCE DOM ELEMENTİNİN BOYUTUNU GÜNCELLEMELİYİZ:
+    // Kütüphane güncellenirken bu elementin yeni boyutlarını baz alacak
+    const containerElement = document.getElementById("flipbook-container");
+    if (containerElement) {
+        containerElement.style.width = `${Math.round(newWidth)}px`;
+        containerElement.style.height = `${Math.round(newHeight)}px`;
     }
+	
+	// 2. KÜTÜPHANEYİ HATASIZ BİR ŞEKİLDE YENİDEN YÜKLE VE TETİKLE
+    if (pageFlipInstance) {
+        const pages = document.querySelectorAll('.page-container');
+        if (pages && pages.length > 0 && typeof pageFlipInstance.loadFromHTML === 'function') {
+            pageFlipInstance.loadFromHTML(pages);
+        }
+    }
+    
+    
 });

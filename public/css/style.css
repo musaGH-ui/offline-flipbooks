@@ -3,13 +3,14 @@ body, html {
     padding: 0;
     width: 100%;
     height: 100vh;
-	overflow: hidden;
+	overflow: hidden !important;
 	display: flex;
 	justify-content: center;
 	align-items: center;
     font-family: Arial, sans-serif;
     background-color: #f5f5f5;
-    
+    /* Pencerenin kendisinin dikeyde kaymasını kesin olarak engelliyoruz */
+    scroll-behavior: auto !important;
 }
 body {
 	background: url("../images/arka_plan.jpg") no-repeat center center fixed !important;
@@ -146,16 +147,54 @@ body {
     opacity: 1 !important;
 }
 
-#flipbook-container,.page-flip {
+#flipbook-container {
+    /* Sayfa geçişlerinde konumun oynamaması için sabit pozisyon güvencesi */
+    position: relative; 
+    max-width: 95vw;
+    max-height: 85vh;
+    width: 100%;
+    height: 100%;
+    overflow: hidden !important;
+    
+    /* Boyut değişimlerinde animasyon zıplamalarını yutması için */
+    transition: none !important; 
+    
+    transform-origin: center center;
+    flex-shrink: 0 !important;
+}
+
+.page-flip ,
+.st-page-flip,
+.st-flipbook
+{
     max-width: 95vw;  /* Ekran genişliğinin %80'ini geçmesin */
-    max-height: 90vh; /* Ekran yüksekliğinin %85'ini geçmesin */
+    max-height: 85vh; /* Ekran yüksekliğinin %85'ini geçmesin */
 	width: 100%;
 	height: 100%;
+	overflow: hidden !important; /* Asla iç kaydırma çubuğu çıkaramaz */
 	/* 🌟 ZOOM İÇİN KRİTİK: scale() ile büyütme yaparken tarayıcının 
        scroll-bar hesaplarını doğru yapabilmesi için orijini merkeze kilitliyoruz */
     transform-origin: center center;
 	/* Esnek mizanpajda ezilmesini kesinlikle önlemek için */
     flex-shrink: 0 !important;
+	outline: none !important; /* Tarayıcının focus (odaklanma) çerçevesini siler */
+    
+}
+
+/* 🌟 KÜTÜPHANENİN İÇ SAYFALARI (Animasyona uğrayan katman) */
+/* Sayfaların boyutunu kütüphane yönetsin, biz sadece zıplama ve odak engellerini koyalım */
+.page {
+    outline: none !important; 
+    -webkit-backface-visibility: hidden; 
+    backface-visibility: hidden;
+    overflow: hidden !important;
+}
+
+#flipbook-container::-webkit-scrollbar,
+.page-flip::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
 }
 
 /* Toolbar Ana Gövdesi */
