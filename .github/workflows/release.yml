@@ -50,8 +50,16 @@ jobs:
           if [ -z "$RAW_NAME" ] || [ "$RAW_NAME" == "*.pdf" ] || [ "$RAW_NAME" == "" ]; then
             PDF_NAME="DOS-Flipbook"
           else
-            # Dosya adındaki yasadışı veya kararsız karakterleri temizle
-            PDF_NAME=$(echo "$RAW_NAME" | sed 's/[^a-zA-O-Z0-9_-]//g')
+            # 🌟 GÜVENLİ VE TEMİZ KARAKTER ONARIMI:
+            # sed hatasını tamamen çöpe atıyoruz. Dosya adındaki boşlukları alt tireye çevirip,
+            # sadece güvenli karakterleri (a-z, A-Z, 0-9, tire ve alt tire) filtreliyoruz.
+            CLEANED_SPACE="${RAW_NAME// /_}"
+            PDF_NAME=$(echo "$CLEANED_SPACE" | tr -cd 'a-zA-Z0-9_-')
+            
+            # Eğer temizleme sonrası dize tamamen boş kalırsa koruma sağla
+            if [ -z "$PDF_NAME" ]; then
+              PDF_NAME="DOS-Flipbook"
+            fi
           fi
           echo "Yakalanan E-Kitap Adı: $PDF_NAME"
           
