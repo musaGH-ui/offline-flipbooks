@@ -41,7 +41,7 @@ jobs:
       - name: Node Bağımlılıklarını Kur
         run: npm install
         
-      - name: Dinamik Uygulama İsmi ve Kimliği 
+      - name: Dinamik Uygulama İsmi ve Kimliği Ayarla
         shell: bash
         run: |
           # 1. Projedeki docs/ klasöründen tek olan PDF'in adını uzantısız yakala
@@ -60,25 +60,24 @@ jobs:
           UNIQUE_ID="com.dos.flipbook.$UNIQUE_HASH"
           echo "Üretilen Benzersiz Kimlik: $UNIQUE_ID"
           
-          # 3. Tauri v2 Şemasına uygun olarak tauri.conf.json dosyasını dinamik güncelle
+          # 3. Ortam değişkenlerini Node betiğine güvenle aktarmak için dışa aktar
+          export ENV_PDF_NAME="$PDF_NAME"
+          export ENV_UNIQUE_ID="$UNIQUE_ID"
+          
+          # 4. Tauri v2 saf kök şemasına göre tauri.conf.json dosyasını güncelle
           node -e "
             const fs = require('fs');
             const conf = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8'));
-            
-            const targetName = process.env.ENV_PDF_NAME;
-            const targetId = process.env.ENV_UNIQUE_ID;
-            
-            // 🌟 TAURI v2 STANDARDI: productName ve identifier doğrudan KÖK (root) dizindedir!
-            conf.productName = targetName;
-            
-            if (!conf.bundle) conf.bundle = {};
-            conf.bundle.identifier = targetId;
-            
+                      
+            / 🌟 TAURI v2 KÖK DİZİN GÜNCELLEMELERİ
+            conf.productName = process.env.ENV_PDF_NAME;
+            conf.identifier = process.env.ENV_UNIQUE_ID;
+                    
             // Pencere Başlığını Değiştir (v2'de app.windows veya doğrudan windows altındadır)
             if (conf.app && conf.app.windows && conf.app.windows[0]) {
-              conf.app.windows[0].title = targetName;
+              conf.app.windows[0].title = process.env.ENV_PDF_NAME;
             } else if (conf.windows && conf.windows[0]) {
-              conf.windows[0].title = targetName;
+              conf.windows[0].title = process.env.ENV_PDF_NAME;
             }
                       
             fs.writeFileSync('src-tauri/tauri.conf.json', JSON.stringify(conf, null, 2));
