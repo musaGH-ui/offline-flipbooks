@@ -69,7 +69,7 @@ jobs:
             const fs = require('fs');
             const conf = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8'));
                       
-            / 🌟 TAURI v2 KÖK DİZİN GÜNCELLEMELERİ
+            // 🌟 TAURI v2 KÖK DİZİN GÜNCELLEMELERİ
             conf.productName = process.env.ENV_PDF_NAME;
             conf.identifier = process.env.ENV_UNIQUE_ID;
                     
