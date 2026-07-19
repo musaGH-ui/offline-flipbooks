@@ -46,7 +46,7 @@ jobs:
         run: |
           # 1. Projedeki docs/ klasöründen tek olan PDF'in adını uzantısız yakala
           # Karakter uyumsuzluklarını önlemek için dosya adındaki boşlukları ve özel karakterleri temizliyoruz
-          RAW_NAME=$(basename "$(ls docs/*.pdf | head -n 1 2>/dev/null)" .pdf)
+          RAW_NAME=$(basename "$(ls www/docs/*.pdf | head -n 1 2>/dev/null)" .pdf)
           if [ -z "$RAW_NAME" ] || [ "$RAW_NAME" == "*.pdf" ] || [ "$RAW_NAME" == "" ]; then
             PDF_NAME="DOS-Flipbook"
           else

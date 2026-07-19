@@ -1,0 +1,25 @@
+.stPageFlip {
+    position: relative;
+    display: block;
+    box-sizing: border-box;
+}
+
+.stPageFlip .page {
+    float: left;
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    transform-style: preserve-3d;
+}
+
+.stPageFlip .page-content {
+    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
+    position: relative;
+}
+
+.stPageFlip .page-dummy {
+    display: none;
+}

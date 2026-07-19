@@ -1,0 +1,93 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent !important;
+  overflow: hidden !important; 
+  
+  /* 🎯 ÇÖZÜM: Arka plan resmini HTML/BODY katmanına çekiyoruz. 
+     Böylece iç katmanlar ne kadar scale edilirse edilsin arka plan ASLA kaybolmaz! */
+  background: url("../images/arka_plan.jpg") no-repeat center center fixed !important;
+  background-size: cover !important;
+  
+  /* İçindeki her şeyi ekranın tam ortasında eşitleyen esnek flex */
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+/* 🎯 EN DIŞ KATMAN: Kütüphane bu kutuyu 2400x1800 piksel algılar. 
+   'fixed' modundayken alanı devasa gördüğü için sayfaları ASLA tek sayfaya düşürmez! */
+#zoom-container {
+  width: 2400px !important; 
+  height: 1800px !important; 
+  display: block !important;
+  position: relative;
+  
+  /* Küçülme tam geometrik merkezden yapılır */
+  transform-origin: center center !important; 
+  transition: transform 0.2s ease-out; 
+}
+
+/* 🎯 İÇ KATMAN: Toolbar ile bağımsız olarak büyüyecek olan esnek sarmalayıcı */
+#flipbook-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-origin: center center !important;
+  transition: transform 0.2s ease-out;
+}
+
+/* En içteki kütüphane gövdesi */
+#book {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Kapağın 2400px'lik alanın tam ortasında durmasını sağlayan kural */
+.stf__parent {
+  margin: 0 auto !important; 
+}
+
+/* Şeffaflık temizliği */
+#book *, .stPageFlip, .page, .page-content, .stf__parent, .sft__wrapper, .stf__block, .stf__item {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.stf__outerShadow, .stf__innerShadow, .stf__hardShadow, .stf__hardInnerShadow {
+  display: none !important;
+}
+
+/* PDF Canvas Kalitesi */
+#book canvas, #book img, .page-content canvas {
+  image-rendering: -webkit-optimize-contrast !important;
+  image-rendering: crisp-edges !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* TOOLBAR: Fixed olarak ekranda çakılı kalır */
+#toolbar {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  position: fixed !important;
+  top: 25px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 999999 !important;
+}
+
+#toolbar button {
+  padding: 8px 16px;
+  border: none;
+  background: #222;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+  font-weight: bold;
+}
