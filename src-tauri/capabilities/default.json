@@ -6,6 +6,10 @@
     "main"
   ],
   "permissions": [
-    "core:default"
+    "core:default",
+	"fs:allow-read-asset",
+    "bi-directional-auth",
+    "core:fs:allow-appdata-read",
+    "core:fs:allow-resource-read"
   ]
 }
