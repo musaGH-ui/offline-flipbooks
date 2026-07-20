@@ -17,7 +17,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
 let pdfDoc = null;
 let totalPages = null;
 let pageFlipInstance = null;
-const pdfUrl = `./docs/ABONELİK SÖZLEŞMESİNDEN KAYNAKLANAN ALACAK DAVALARI_compressed.pdf?t=${new Date().getTime()}`;
+const pdfUrl = `./docs/abonelik-sozlesmesinden-kaynaklanan-alacak-davalari.pdf?t=${new Date().getTime()}`;
 
 // Global arama terimi değişkeni
 let currentSearchTerm = "";
