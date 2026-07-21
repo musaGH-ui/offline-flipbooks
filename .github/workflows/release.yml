@@ -40,6 +40,10 @@ jobs:
 
       - name: Node Bağımlılıklarını Kur
         run: npm install
+        
+        # 🌟 YENİ ADIM: Frontend'i projenin ana dizininde güvenle derleyip dist/ oluşturur
+      - name: Frontend Uygulamasını Derle
+        run: npm run build
                
       - name: Tauri Uygulamasını Derle
         uses: tauri-apps/tauri-action@v0

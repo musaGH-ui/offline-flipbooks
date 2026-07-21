@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "identifier": "com.dos.flipbook.default",
   "build": {
-	"beforeBuildCommand": "npm run build",
+	"beforeBuildCommand": "",
     "frontendDist": "../dist", 
     "devUrl": "http://localhost:5173"
   },
