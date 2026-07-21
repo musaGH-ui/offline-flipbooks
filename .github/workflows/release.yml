@@ -69,10 +69,21 @@ jobs:
           echo "Yakalanan İsim: $PDF_NAME"
           echo "Yakalanan ID: $UNIQUE_ID"
           
-          # jq ile tauri.conf.json dosyasını doğrudan güncelleme (Garantili Yöntem)
-          jq --arg name "$PDF_NAME" --arg id "$UNIQUE_ID" \
-            '.productName = $name | .identifier = $id | (.app.windows[0].title = $name)' \
-            src-tauri/tauri.conf.json > src-tauri/tauri.conf.json.tmp && mv src-tauri/tauri.conf.json.tmp src-tauri/tauri.conf.json
+          node -e "
+            const fs = require('fs');
+            const file = 'src-tauri/tauri.conf.json';
+            const conf = JSON.parse(fs.readFileSync(file, 'utf8'));
+
+            conf.productName = '$PDF_NAME';
+            conf.identifier = '$UNIQUE_ID';
+
+            if (conf.app && conf.app.windows && conf.app.windows[0]) {
+              conf.app.windows[0].title = '$PDF_NAME';
+            }
+
+            fs.writeFileSync(file, JSON.stringify(conf, null, 2));
+            console.log('tauri.conf.json başarıyla güncellendi.');
+          "
           
         env:
           MY_PDF_NAME: ${{ steps.get_name.outputs.name }}
