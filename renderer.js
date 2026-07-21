@@ -17,7 +17,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
 let pdfDoc = null;
 let totalPages = null;
 let pageFlipInstance = null;
-const pdfUrl = `./docs/ABONELİK SÖZLEŞMESİNDEN KAYNAKLANAN ALACAK DAVALARI_compressed.pdf?t=${new Date().getTime()}`;
+const pdfUrl = `./docs/abonelik-sozlesmesinden-kaynaklanan-alacak-davalari.pdf?t=${new Date().getTime()}`;
+// 2. Kullanıcının ekranda ve pencere başlığında göreceği şık Türkçe başlık
+const displayTitle = "ABONELİK SÖZLEŞMESİNDEN KAYNAKLANAN ALACAK DAVALARI";
 
 // Global arama terimi değişkeni
 let currentSearchTerm = "";
@@ -62,6 +64,14 @@ window.addEventListener('DOMContentLoaded', async() => {
     } catch (windowError) {
         console.error("Pencere boyutlandırılırken hata:", windowError);
     }
+	
+	// HTML'de flipbook'un üstüne koyduğumuz başlık alanını günceller
+	const titleElement = document.getElementById('book-title');
+	if (titleElement) {
+	  titleElement.textContent = displayTitle;
+	}
+	// Uygulama penceresinin üst çerçevesini de günceller
+	document.title = displayTitle;
     // Tarayıcı zoom'unu bozmadan her şeyi orijinal piksellerinde (%100) bırakıyoruz
     loadPDF(pdfUrl);
     

@@ -1049,3 +1049,18 @@ button#btn-toggle-shop i {
     background: #ffffff !important;
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.4) !important;
 }
+
+/* Flipbook üstündeki dinamik kitap başlığı stili */
+.flipbook-header-title {
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 12px 0 8px 0;
+  padding: 0 15px;
+  letter-spacing: 0.5px;
+  /* Çok uzun kitap adlarında ekranı bozmaması için sınırlandırma: */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
