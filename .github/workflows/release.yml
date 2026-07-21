@@ -46,6 +46,7 @@ jobs:
         run: |
           # 1. Projedeki public/docs/ klasöründen tek olan PDF'in adını uzantısız yakala
           RAW_NAME=$(basename "$(ls public/docs/*.pdf 2>/dev/null | head -n 1)" .pdf)
+          
           if [ -z "$RAW_NAME" ] || [ "$RAW_NAME" == "*.pdf" ] ; then
             PDF_NAME="DOS-Flipbook"
           else
@@ -54,11 +55,8 @@ jobs:
             # sadece güvenli karakterleri (a-z, A-Z, 0-9, tire ve alt tire) filtreliyoruz.
             CLEANED_SPACE="${RAW_NAME// /_}"
             PDF_NAME=$(echo "$CLEANED_SPACE" | tr -cd 'a-zA-Z0-9_-')
+            [ -z "$PDF_NAME" ] && PDF_NAME="DOS-Flipbook"
             
-            # Eğer temizleme sonrası dize tamamen boş kalırsa koruma sağla
-            if [ -z "$PDF_NAME" ]; then
-              PDF_NAME="DOS-Flipbook"
-            fi
           fi
           echo "Yakalanan E-Kitap Adı: $PDF_NAME"
           
@@ -68,28 +66,17 @@ jobs:
           UNIQUE_ID="com.dos.flipbook.$UNIQUE_HASH"
           echo "Üretilen Benzersiz Kimlik: $UNIQUE_ID"
           
-          # 3. Tauri v2 saf kök şemasına göre tauri.conf.json dosyasını güncelle
-          node -e "
-            const fs = require('fs');
-            const conf = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8'));
-                      
-            // 🌟 TAURI v2 KÖK DİZİN GÜNCELLEMELERİ
-            conf.productName = process.env.ENV_PDF_NAME;
-            conf.identifier = process.env.ENV_UNIQUE_ID;
-                    
-            // Pencere Başlığını Değiştir (v2'de app.windows veya doğrudan windows altındadır)
-            if (conf.app && conf.app.windows && conf.app.windows[0]) {
-              conf.app.windows[0].title = process.env.ENV_PDF_NAME;
-            } else if (conf.windows && conf.windows[0]) {
-              conf.windows[0].title = process.env.ENV_PDF_NAME;
-            }
-                      
-            fs.writeFileSync('src-tauri/tauri.conf.json', JSON.stringify(conf, null, 2));
-            console.log('tauri.conf.json v2 şemasına göre başarıyla güncellendi.');
-          "
+          echo "Yakalanan İsim: $PDF_NAME"
+          echo "Yakalanan ID: $UNIQUE_ID"
+          
+          # jq ile tauri.conf.json dosyasını doğrudan güncelleme (Garantili Yöntem)
+          jq --arg name "$PDF_NAME" --arg id "$UNIQUE_ID" \
+            '.productName = $name | .identifier = $id | (.app.windows[0].title = $name)' \
+            src-tauri/tauri.conf.json > src-tauri/tauri.conf.json.tmp && mv src-tauri/tauri.conf.json.tmp src-tauri/tauri.conf.json
+          
         env:
-          ENV_PDF_NAME: ${{ env.PDF_NAME }}
-          ENV_UNIQUE_ID: ${{ env.UNIQUE_ID }}
+          MY_PDF_NAME: ${{ steps.get_name.outputs.name }}
+          MY_UNIQUE_ID: "com.dos.flipbook.app"
       
         # Tauri derlemeden hemen önce eğer bir build betiğiniz varsa tetikler
       - name: Frontend Projesini Derle
