@@ -66,10 +66,7 @@ window.addEventListener('DOMContentLoaded', async() => {
     }
 	
 	// HTML'de flipbook'un üstüne koyduğumuz başlık alanını günceller
-	const titleElement = document.getElementById('book-title');
-	if (titleElement) {
-	  titleElement.textContent = displayTitle;
-	}
+	
 	// Uygulama penceresinin üst çerçevesini de günceller
 	document.title = displayTitle;
     // Tarayıcı zoom'unu bozmadan her şeyi orijinal piksellerinde (%100) bırakıyoruz
