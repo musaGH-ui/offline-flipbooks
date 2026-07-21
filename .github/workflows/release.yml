@@ -49,6 +49,7 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.TAURI_TOKEN }}
+          RUST_BACKTRACE: 1
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "DOS Flipbook ${{ github.ref_name }}"
