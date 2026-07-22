@@ -274,39 +274,46 @@ window.addEventListener('DOMContentLoaded', async() => {
 
     // Uygulama başladığında mağaza yükleme motorunu çalıştır
     loadShopItems();
-	// 🌐 Tüm Dış Bağlantıları Açan Saf (Eklentisiz) Yardımcı
-	// Dış Bağlantı Açıcı Fonksiyon:
-	const handleExternalLink = async (targetUrl) => {
-	  if (!targetUrl || targetUrl === '#' || targetUrl.startsWith('javascript:')) return;
+	// 🌐 %100 Garantili Dış Bağlantı Açıcı (Rust Command)
+	const handleExternalLink = (targetUrl) => {
+		if (!targetUrl || targetUrl === '#' || targetUrl.startsWith('javascript:')) return;
 
-	  try {
-		// 1. Tauri Ortamı
+		// 1. Tauri Ortamı (Doğrudan İşletim Sistemine Tetik Gönderir)
 		if (window.__TAURI_INTERNALS__ || window.__TAURI__) {
-		  await openUrl(targetUrl);
-		  return;
+			try {
+				const invoke = window.__TAURI_INTERNALS__?.invoke || window.__TAURI__?.core?.invoke;
+				if (invoke) {
+					invoke('open_in_browser', { url: targetUrl });
+					return;
+				}
+			} catch (err) {
+				console.error("Rust komut hatası:", err);
+			}
 		}
 
 		// 2. Electron Ortamı
 		if (window.require) {
-		  const { shell } = window.require('electron');
-		  shell.openExternal(targetUrl);
-		  return;
+			try {
+				const { shell } = window.require('electron');
+				shell.openExternal(targetUrl);
+				return;
+			} catch (e) {}
 		}
 
 		// 3. Normal Tarayıcı Fallback
 		window.open(targetUrl, '_blank');
-	  } catch (err) {
-		console.warn("Dış bağlantı açılırken hata:", err);
-		window.open(targetUrl, '_blank');
-	  }
-	}; //const handleExternalLink = async (targetUrl)
+	};//const handleExternalLink = (targetUrl) => {
 	
 	// 2. Logo Tıklama Dinleyicisi
 	const logoLink = document.getElementById('brand-logo-link');
 	if (logoLink) {
 		logoLink.addEventListener('click', async (e) => {
 		e.preventDefault();
-		await handleExternalLink('https://dosdijitalyayincilik.com');
+		try {
+            await handleExternalLink('https://dosdijitalyayincilik.com');
+        } catch (err) {
+            console.error("Logo linki açılırken hata oluştu:", err);
+        }
 		});
 	}
   
