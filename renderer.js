@@ -379,7 +379,10 @@ async function initFlipbook() {
     
     const pageWidth = Math.floor(viewport.width);
     const pageHeight = Math.floor(viewport.height);
-
+	if (!container) {
+        console.error("KRİTİK HATA: #flipbook-container elemanı HTML'de bulunamadı!");
+        return;
+    }
     console.log(`Doğal mizanpajda piksel hizalamalı render başlatıldı: ${pageWidth}x${pageHeight}`);
 
     // Tüm sayfaları sırayla oluşturup mizanpaj baskısı olmadan tertemiz çizdiriyoruz
