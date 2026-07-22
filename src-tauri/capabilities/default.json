@@ -9,6 +9,7 @@
     "core:default",
     "core:path:default",
     "core:resources:default",
-    "log:default"
+    "log:default",
+	"opener:default"
   ]
 }
