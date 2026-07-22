@@ -280,51 +280,34 @@ window.addEventListener('DOMContentLoaded', async() => {
 
     // Uygulama başladığında mağaza yükleme motorunu çalıştır
     loadShopItems();
-	// 1. Dış Bağlantı Açma Yardımcısı (Tauri v2 + Electron + Web Uyumlu)
-	const handleExternalLink = async (targetUrl) => {
+	// 🌐 Tüm Dış Bağlantıları Açan Saf (Eklentisiz) Yardımcı
+	const handleExternalLink = (targetUrl) => {
 		if (!targetUrl || targetUrl === '#' || targetUrl.startsWith('javascript:')) return;
 
 		try {
-			// A) Tauri Ortamı Kontrolü (v2 & v1)
-			if (window.__TAURI_INTERNALS__ || window.__TAURI__) {
-				// 1. Öncelik: Baştan yüklenmiş tauriOpener modülü var mı?
-				if (typeof tauriOpener === 'function') {
-					await tauriOpener(targetUrl);
-					return;
-				}
-
-				// 2. Öncelik: Dinamik olarak opener eklentisini çağır
-				try {
-					const openerModule = await import('@tauri-apps/plugin-opener');
-					if (openerModule && openerModule.openUrl) {
-						await openerModule.openUrl(targetUrl);
-						return;
-					}
-				} catch (importErr) {
-					console.warn("Tauri opener modülü dinamik yüklenemedi:", importErr);
-				}
-
-				// 3. Öncelik: Tauri v1 legacy shell kontrolü
-				if (window.__TAURI__?.shell?.open) {
-					await window.__TAURI__.shell.open(targetUrl);
-					return;
-				}
-			}
-
-			// B) Electron Ortamı Kontrolü
+			// 1. Electron Ortamı
 			if (window.require) {
 				const { shell } = window.require('electron');
 				shell.openExternal(targetUrl);
 				return;
 			}
 
-			// C) Normal Tarayıcı / Fallback
-			window.open(targetUrl, '_blank');
+			// 2. Tauri v2 / v1 ve Standart Tarayıcı
+			// Tauri v2 varsayılan olarak _blank hedefli linkleri varsayılan sistem tarayıcısında açar
+			const tempLink = document.createElement('a');
+			tempLink.href = targetUrl;
+			tempLink.target = '_blank';
+			tempLink.rel = 'noopener noreferrer';
+			document.body.appendChild(tempLink);
+			tempLink.click();
+			document.body.removeChild(tempLink);
+
 		} catch (err) {
 			console.warn("Dış bağlantı açılırken hata oluştu, varsayılan metoda düşülüyor:", err);
 			window.open(targetUrl, '_blank');
 		}
 	};
+	
 	// 2. Logo Tıklama Dinleyicisi
 	const logoLink = document.getElementById('brand-logo-link');
 	if (logoLink) {
