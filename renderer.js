@@ -4,13 +4,6 @@ import * as pdfjsLib from "pdfjs-dist";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { LogicalSize } from "@tauri-apps/api/window";
 //import { openUrl } from '@tauri-apps/plugin-opener';
-// En üstte varsa import et (Tauri v2 eklentisi kuruluysa)
-let tauriOpener = null;
-try {
-  import('@tauri-apps/plugin-opener').then(module => {
-    tauriOpener = module.openUrl;
-  }).catch(() => {});
-} catch (e) {}
 
 // PDF.js v4+ Modül yapısı uyumluluk köprüsü
 /*if (pdfjsLib && !pdfjsLib.TextLayer) {
