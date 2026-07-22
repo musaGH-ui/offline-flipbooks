@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^2.11.1",
+    "@tauri-apps/plugin-opener": "^2.5.4",
     "page-flip": "^2.0.7",
     "pdfjs-dist": "^6.1.200"
   }

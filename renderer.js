@@ -1,3 +1,4 @@
+import { openUrl } from '@tauri-apps/plugin-opener';
 import { PageFlip } from "page-flip";
 import * as pdfjsLib from "pdfjs-dist";
 // 1. Yeni Tauri v2 standardına göre pencere modüllerini içe aktarıyoruz
@@ -274,32 +275,31 @@ window.addEventListener('DOMContentLoaded', async() => {
     // Uygulama başladığında mağaza yükleme motorunu çalıştır
     loadShopItems();
 	// 🌐 Tüm Dış Bağlantıları Açan Saf (Eklentisiz) Yardımcı
-	const handleExternalLink = (targetUrl) => {
-		if (!targetUrl || targetUrl === '#' || targetUrl.startsWith('javascript:')) return;
+	// Dış Bağlantı Açıcı Fonksiyon:
+	const handleExternalLink = async (targetUrl) => {
+	  if (!targetUrl || targetUrl === '#' || targetUrl.startsWith('javascript:')) return;
 
-		try {
-			// 1. Electron Ortamı
-			if (window.require) {
-				const { shell } = window.require('electron');
-				shell.openExternal(targetUrl);
-				return;
-			}
-
-			// 2. Tauri v2 / v1 ve Standart Tarayıcı
-			// Tauri v2 varsayılan olarak _blank hedefli linkleri varsayılan sistem tarayıcısında açar
-			const tempLink = document.createElement('a');
-			tempLink.href = targetUrl;
-			tempLink.target = '_blank';
-			tempLink.rel = 'noopener noreferrer';
-			document.body.appendChild(tempLink);
-			tempLink.click();
-			document.body.removeChild(tempLink);
-
-		} catch (err) {
-			console.warn("Dış bağlantı açılırken hata oluştu, varsayılan metoda düşülüyor:", err);
-			window.open(targetUrl, '_blank');
+	  try {
+		// 1. Tauri Ortamı
+		if (window.__TAURI_INTERNALS__ || window.__TAURI__) {
+		  await openUrl(targetUrl);
+		  return;
 		}
-	};
+
+		// 2. Electron Ortamı
+		if (window.require) {
+		  const { shell } = window.require('electron');
+		  shell.openExternal(targetUrl);
+		  return;
+		}
+
+		// 3. Normal Tarayıcı Fallback
+		window.open(targetUrl, '_blank');
+	  } catch (err) {
+		console.warn("Dış bağlantı açılırken hata:", err);
+		window.open(targetUrl, '_blank');
+	  }
+	}; //const handleExternalLink = async (targetUrl)
 	
 	// 2. Logo Tıklama Dinleyicisi
 	const logoLink = document.getElementById('brand-logo-link');
