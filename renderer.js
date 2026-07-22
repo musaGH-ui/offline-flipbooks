@@ -3,6 +3,14 @@ import * as pdfjsLib from "pdfjs-dist";
 // 1. Yeni Tauri v2 standardına göre pencere modüllerini içe aktarıyoruz
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { LogicalSize } from "@tauri-apps/api/window";
+//import { openUrl } from '@tauri-apps/plugin-opener';
+// En üstte varsa import et (Tauri v2 eklentisi kuruluysa)
+let tauriOpener = null;
+try {
+  import('@tauri-apps/plugin-opener').then(module => {
+    tauriOpener = module.openUrl;
+  }).catch(() => {});
+} catch (e) {}
 
 // PDF.js v4+ Modül yapısı uyumluluk köprüsü
 /*if (pdfjsLib && !pdfjsLib.TextLayer) {
@@ -249,27 +257,15 @@ window.addEventListener('DOMContentLoaded', async() => {
 
                     // 4. Dinamik HTML Kartı Oluşturma
                     htmlContent += `
-                        <li class="shop-item">
-                            <img src="${imagePath}" alt="${title}" class="shop-item-cover" onerror="this.src='./images/Logo_512x800-Photoroom.png';">
-                            <div class="shop-item-details">
+						<li class="shop-item">
+							<img src="${imagePath}" alt="${title}" class="shop-item-cover" onerror="this.src='./images/Logo_512x800-Photoroom.png';">
+							<div class="shop-item-details">
 								<span class="shop-item-title">${title}</span>
-								<!-- 🌟 HİBRİT BUTON: Ortamı algılayarak hem Electron'da hem Tauri'de tarayıcıyı tetikler -->
-								<a href="#" onclick="
-									if (window.__TAURI__ && window.__TAURI__.shell) {
-										window.__TAURI__.shell.open('${link}');
-									} else if (window.require) {
-										// Electron ortamı için harici tarayıcı tetikleyicisi
-										const { shell } = window.require('electron');
-										shell.openExternal('${link}');
-									} else {
-										// Tarayıcı veya fallback ortamı için varsayılan açılış
-										window.open('${link}', '_blank');
-									}
-									return false;
-								" class="btn-buy-now">İncele</a>
+								<!-- HTML içinde karmaşık kod yerine temiz link ve sınıf kullanımı -->
+								<a href="${link}" class="btn-buy-now shop-inspect-btn">İncele</a>
 							</div>
-                        </li>
-                    `;
+						</li>
+					`;
                 }
             });
 
@@ -284,7 +280,55 @@ window.addEventListener('DOMContentLoaded', async() => {
 
     // Uygulama başladığında mağaza yükleme motorunu çalıştır
     loadShopItems();
-});
+	// 1. Dış Bağlantı Açma Yardımcısı
+	  const handleExternalLink = (targetUrl) => {
+		if (!targetUrl || targetUrl === '#' || targetUrl.startsWith('javascript:')) return;
+
+		try {
+		  // Electron Ortamı
+		  if (window.require) {
+			const { shell } = window.require('electron');
+			shell.openExternal(targetUrl);
+			return;
+		  }
+		  
+		  // Tauri Ortamı (v2 / v1)
+		  if (window.__TAURI_INTERNALS__ || window.__TAURI__) {
+			window.open(targetUrl, '_system');
+			return;
+		  }
+
+		  // Normal Tarayıcı / Fallback
+		  window.open(targetUrl, '_blank');
+		} catch (err) {
+		  console.warn("Dış bağlantı açılırken hata oluştu, varsayılan metoda düşülüyor:", err);
+		  window.open(targetUrl, '_blank');
+		}
+	  };
+	// 2. Logo Tıklama Dinleyicisi
+	const logoLink = document.getElementById('brand-logo-link');
+	if (logoLink) {
+		logoLink.addEventListener('click', async (e) => {
+		e.preventDefault();
+		await handleExternalLink('https://dosdijitalyayincilik.com');
+		});
+	}
+  
+	// 3. Mağaza Paneli "İncele" Butonları (Dinamik Liste Yakalayıcı)
+	document.body.addEventListener('click', (e) => {
+    // Tıklanan eleman veya onun kapsayıcısı .btn-buy-now, .shop-inspect-btn veya .btn-inspect mi?
+    const btn = e.target.closest('.btn-buy-now, .shop-inspect-btn, .btn-inspect');
+    
+    if (btn) {
+      e.preventDefault();
+      // Link değerini href attribute'undan güvenle çekiyoruz
+      const destination = btn.getAttribute('href') || btn.dataset.link;
+      if (destination) {
+        handleExternalLink(destination);
+      }
+    }
+  });
+});//window.addEventListener('DOMContentLoaded', async() => {
 
 // =========================================================================
 // 2. PDF YÜKLEME VE KÜÇÜK RESİM SENKRONİZASYONU
@@ -984,3 +1028,5 @@ window.addEventListener('resize', () => {
     
     
 });
+
+
