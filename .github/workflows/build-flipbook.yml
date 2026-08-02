@@ -1,0 +1,61 @@
+name: On-Demand Flipbook Builder
+
+on:
+  workflow_dispatch:
+    inputs:
+      product_name:
+        description: 'Kitap Adı (Örn: Abonelik Sozlesmesi Davalari)'
+        required: true
+        default: 'Hukuk Dava Rehberleri Serisi Kitabı'
+      identifier:
+        description: 'Paket Kimliği (Örn: com.dosdijital.flipbook.alacakdavalari)'
+        required: true
+        default: 'com.dosdijital.flipbook.hukukdavarehberleriserisikitabi'
+      window_title:
+        description: 'Pencere Üst Başlığı'
+        required: true
+        default: 'HUKUK DAVA REHBERLERİ SERİSİ KİTABI'
+
+jobs:
+  build-tauri:
+    permissions:
+      contents: write
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Tauri App with Dynamic Config
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.TAURI_TOKEN }}
+        with:
+          tagName: v1.0.${{ github.run_number }}
+          releaseName: '${{ inputs.product_name }} - v1.0.${{ github.run_number }}'
+          releaseDraft: false
+          prerelease: false
+          # 🌟 DİNAMİK JSON OVERRIDE BURADA YAPILIYOR
+          config: |
+            {
+              "productName": "${{ inputs.product_name }}",
+              "identifier": "${{ inputs.identifier }}",
+              "app": {
+                "windows": [
+                  {
+                    "title": "${{ inputs.window_title }}"
+                  }
+                ]
+              }
+            }
