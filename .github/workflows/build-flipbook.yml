@@ -6,16 +6,19 @@ on:
       product_name:
         description: 'Kitap Adı (Örn: Abonelik Sozlesmesi Davalari)'
         required: true
-        default: 'Hukuk Dava Rehberleri Serisi Kitabı'
+        default: 'Abonelik Söz. Kaynak.Alacak D.'
       identifier:
         description: 'Paket Kimliği (Örn: com.dosdijital.flipbook.alacakdavalari)'
         required: true
-        default: 'com.dosdijital.flipbook.hukukdavarehberleriserisikitabi'
+        default: 'com.dosdijital.flipbook.abonelik-söz-kaynak-alacak-d'
       window_title:
         description: 'Pencere Üst Başlığı'
         required: true
-        default: 'HUKUK DAVA REHBERLERİ SERİSİ KİTABI'
-
+        default: 'ABONELİK SÖZLEŞMESİNDEN KAYNAKLANAN ALACAK DAVALARI'
+      pdf_file_name:
+        description: 'public/docs Klasöründeki PDF Dosya Adı'
+        required: true
+        default: 'abonelik-sozlesmesinden-kaynaklanan-alacak-davalari.pdf'
 jobs:
   build-tauri:
     permissions:
@@ -36,7 +39,18 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-
+        
+      # 🌟 YENİ ADIM: JS İÇİNDEKİ PDF YOLUNU DİNAMİK OLARAK DEĞİŞTİRİR
+      - name: Inject Active PDF File Name
+        shell: powershell
+        run: |
+          $jsFile = "renderer.js" # Veya PDF yolunu tanımladığın JS/HTML dosyasının yolu
+          if (Test-Path $jsFile) {
+            (Get-Content $jsFile -Raw) -replace 'ACTIVE_PDF_FILE', '${{ inputs.pdf_file_name }}' | Set-Content $jsFile
+            Write-Host "PDF dosyasi başarıyla enjekte edildi: ${{ inputs.pdf_file_name }}"
+          } else {
+            Write-Host "JS dosyasi bulunamadi, varsayılan PDF kullaniliyor."
+          }
       - name: Build Tauri App with Dynamic Config
         uses: tauri-apps/tauri-action@v0
         env:
