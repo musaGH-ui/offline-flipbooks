@@ -40,6 +40,11 @@ jobs:
       - name: Install dependencies
         run: npm install
         
+      # 🌟 YENİ ADIM 1: Frontend Build (dist klasörünü oluşturur)
+      - name: Build Frontend Assets
+        run: |
+          npm run build --if-present
+          
       # 🌟 YENİ ADIM: JS İÇİNDEKİ PDF YOLUNU DİNAMİK OLARAK DEĞİŞTİRİR
       - name: Inject Active PDF File Name
         shell: powershell
@@ -61,15 +66,4 @@ jobs:
           releaseDraft: false
           prerelease: false
           # 🌟 DİNAMİK JSON OVERRIDE BURADA YAPILIYOR
-          config: |
-            {
-              "productName": "${{ inputs.product_name }}",
-              "identifier": "${{ inputs.identifier }}",
-              "app": {
-                "windows": [
-                  {
-                    "title": "${{ inputs.window_title }}"
-                  }
-                ]
-              }
-            }
+          args: --config '{"productName":"${{ inputs.product_name }}", "identifier":"${{ inputs.identifier }}", "app":{"windows":[{"title":"${{ inputs.window_title }}"}]}}'
