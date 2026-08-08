@@ -121,6 +121,28 @@ jobs:
             Write-Host "HATA: PDF Google Drive'dan indirilemedi!"
             exit 1
           } 
+
+      # 🌟 YENİ ADIM: Dinamik Config Dosyasını Disk Üzerinde Oluşturma
+      - name: Generate Dynamic Tauri Config File
+        shell: powershell
+        run: |
+          $configJson = @"
+          {
+            "productName": "$env:PRODUCT_NAME",
+            "identifier": "$env:IDENTIFIER",
+            "app": {
+              "windows": [
+                {
+                  "title": "$env:WINDOW_TITLE"
+                }
+              ]
+            }
+          }
+          "@
+          $configJson | Out-File -FilePath "temp-config.json" -Encoding utf8
+          Write-Host "Geçici Tauri Konfigürasyon Dosyası Üretildi:"
+          Get-Content "temp-config.json"
+          
       # 🌟 TAURI BUILD (ENV DEĞİŞKENLERİ İLE DİNAMİK CONFIG)
       - name: Build Tauri App with Dynamic Config
         uses: tauri-apps/tauri-action@v0
@@ -131,6 +153,7 @@ jobs:
           releaseName: '$env:PRODUCT_NAME - v1.0.${{ github.run_number }}'
           releaseDraft: false
           prerelease: false
+          args: --config temp-config.json
           # 🌟 DİNAMİK JSON OVERRIDE BURADA YAPILIYOR
           #args: --config '{"productName":"${{ inputs.product_name }}", "identifier":"${{ inputs.identifier }}", "app":{"windows":[{"title":"${{ inputs.window_title }}"}]}}'
-          args: --config '{"productName":"'$env:PRODUCT_NAME'", "identifier":"'$env:IDENTIFIER'", "app":{"windows":[{"title":"'$env:WINDOW_TITLE'"}]}}'
+          #args: --config '{"productName":"'$env:PRODUCT_NAME'", "identifier":"'$env:IDENTIFIER'", "app":{"windows":[{"title":"'$env:WINDOW_TITLE'"}]}}'
