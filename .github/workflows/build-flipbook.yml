@@ -101,15 +101,18 @@ jobs:
           New-Item -ItemType Directory -Force -Path "public/docs"
 
           # Webhook veya manuel girişten gelen Google Drive File ID
-          $fileId = "${{ github.event.inputs.gdrive_id }}"
-          if ([string]::IsNullOrEmpty($fileId)) { $fileId = "${{ github.event.client_payload.gdrive_id }}" }
+          #$fileId = "${{ github.event.inputs.gdrive_id }}"
+          $fileId = "$env:GDRIVE_ID"
+          #if ([string]::IsNullOrEmpty($fileId)) { $fileId = "${{ github.event.client_payload.gdrive_id }}" }
 
           $pdfName = "$env:PDF_FILE_NAME"
 
           Write-Host "Google Drive'dan indiriliyor... File ID: $fileId"
           
           # Google Drive'dan dosyayı indirir ve hedef isme adlandırır
-          gdown --id $fileId -O "public/docs/$pdfName"
+          #gdown --id $fileId -O "public/docs/$pdfName"
+          # Yeni gdown sözdizimi: ID doğrudan indirme URL'si olarak iletilir
+          gdown "https://drive.google.com/uc?id=$fileId" -O "public/docs/$pdfName" --fuzzy
 
           if (Test-Path "public/docs/$pdfName") {
             Write-Host "PDF basariyla Google Drive'dan indirildi: public/docs/$pdfName"
