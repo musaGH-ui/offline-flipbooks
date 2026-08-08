@@ -124,9 +124,11 @@ jobs:
       - name: Generate Dynamic Tauri Config File
         shell: powershell
         run: |
+          # Doğrudan PDF adından (.pdf uzantısı sökülerek) temiz SKU/Slug elde edilir
+          $safeProductName = "$env:PDF_FILE_NAME" -replace '\.pdf$', ''
           # BOM olmadan UTF-8 yazan özel PowerShell kod bloğu
           $configObj = @{
-              productName = "$env:PRODUCT_NAME"
+              productName = "$safeProductName"
               identifier  = "$env:IDENTIFIER"
               app         = @{
                   windows = @(
