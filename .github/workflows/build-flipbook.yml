@@ -19,6 +19,9 @@ on:
         description: 'public/docs Klasöründeki PDF Dosya Adı'
         required: true
         default: 'abonelik-sozlesmesinden-kaynaklanan-alacak-davalari.pdf'
+  # 🌟 WOOCOMMERCE WEBHOOK TETİKLEYİCİSİ:
+  repository_dispatch:
+    types: [build-flipbook]
 jobs:
   build-tauri:
     permissions:
@@ -40,7 +43,28 @@ jobs:
       - name: Install dependencies
         run: npm install
         
+      # 🌟 DİNAMİK DEĞİŞKENLERİ HAZIRLAMA (Hem Manuel hem Webhook destekler)
+      - name: Set Build Variables
+        shell: powershell
+        run: |
+          $productName = "${{ github.event.inputs.product_name }}"
+          if ([string]::IsNullOrEmpty($productName)) { $productName = "${{ github.event.client_payload.product_name }}" }
+          
+          $identifier = "${{ github.event.inputs.identifier }}"
+          if ([string]::IsNullOrEmpty($identifier)) { $identifier = "${{ github.event.client_payload.identifier }}" }
+          
+          $windowTitle = "${{ github.event.inputs.window_title }}"
+          if ([string]::IsNullOrEmpty($windowTitle)) { $windowTitle = "${{ github.event.client_payload.window_title }}" }
+
+          $pdfFileName = "${{ github.event.inputs.pdf_file_name }}"
+          if ([string]::IsNullOrEmpty($pdfFileName)) { $pdfFileName = "${{ github.event.client_payload.pdf_file_name }}" }
+
+          echo "PRODUCT_NAME=$productName" >> $env:GITHUB_ENV
+          echo "IDENTIFIER=$identifier" >> $env:GITHUB_ENV
+          echo "WINDOW_TITLE=$windowTitle" >> $env:GITHUB_ENV
+          echo "PDF_FILE_NAME=$pdfFileName" >> $env:GITHUB_ENV  
       # 🌟 YENİ ADIM 1: Frontend Build (dist klasörünü oluşturur)
+      
       - name: Build Frontend Assets
         run: |
           npm run build --if-present
