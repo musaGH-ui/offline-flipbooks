@@ -112,7 +112,8 @@ jobs:
           # Google Drive'dan dosyayı indirir ve hedef isme adlandırır
           #gdown --id $fileId -O "public/docs/$pdfName"
           # Yeni gdown sözdizimi: ID doğrudan indirme URL'si olarak iletilir
-          gdown "https://drive.google.com/uc?id=$fileId" -O "public/docs/$pdfName" --fuzzy
+          gdown "https://drive.google.com/uc?id=$fileId" -O "public/docs/$pdfName"
+          
 
           if (Test-Path "public/docs/$pdfName") {
             Write-Host "PDF basariyla Google Drive'dan indirildi: public/docs/$pdfName"
