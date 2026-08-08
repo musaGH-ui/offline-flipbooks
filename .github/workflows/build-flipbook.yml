@@ -126,22 +126,26 @@ jobs:
       - name: Generate Dynamic Tauri Config File
         shell: powershell
         run: |
-          $configJson = @"
-          {
-            "productName": "$env:PRODUCT_NAME",
-            "identifier": "$env:IDENTIFIER",
-            "app": {
-              "windows": [
-                {
-                  "title": "$env:WINDOW_TITLE"
-                }
-              ]
-            }
+          # BOM olmadan UTF-8 yazan özel PowerShell kod bloğu
+          $configObj = @{
+              productName = "$env:PRODUCT_NAME"
+              identifier  = "$env:IDENTIFIER"
+              app         = @{
+                  windows = @(
+                      @{ title = "$env:WINDOW_TITLE" }
+                  )
+              }
           }
-          "@
-          $configJson | Out-File -FilePath "temp-config.json" -Encoding utf8
-          Write-Host "Geçici Tauri Konfigürasyon Dosyası Üretildi:"
-          Get-Content "temp-config.json"
+          # JSON'a çevir ve BOM kalıntısı olmadan kaydet
+          $jsonContent = $configObj | ConvertTo-Json -Depth 5
+          $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+          
+          # Dosyayı hem kök hem de src-tauri içine garanti olsun diye yazıyoruz
+          [System.IO.File]::WriteAllText("$PWD/src-tauri/temp-config.json", $jsonContent, $utf8NoBom)
+          [System.IO.File]::WriteAllText("$PWD/temp-config.json", $jsonContent, $utf8NoBom)
+
+          Write-Host "Geçici Config Dosyası Üretildi:"
+          Get-Content "src-tauri/temp-config.json"
           
       # 🌟 TAURI BUILD (ENV DEĞİŞKENLERİ İLE DİNAMİK CONFIG)
       - name: Build Tauri App with Dynamic Config
