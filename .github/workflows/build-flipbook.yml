@@ -18,7 +18,11 @@ on:
       pdf_file_name:
         description: 'public/docs Klasöründeki PDF Dosya Adı'
         required: true
-        default: 'abonelik-sozlesmesinden-kaynaklanan-alacak-davalari.pdf'
+        default: 'abonelik-soz-kaynak-alacak-d.pdf'
+      gdrive_id:
+        description: 'Google Drive File ID'
+        required: true
+        default: '12bUyssRXoe8gdOA3uCfeBjeutjlkIdWi'
   # 🌟 WOOCOMMERCE WEBHOOK TETİKLEYİCİSİ:
   repository_dispatch:
     types: [build-flipbook]
@@ -59,10 +63,15 @@ jobs:
           $pdfFileName = "${{ github.event.inputs.pdf_file_name }}"
           if ([string]::IsNullOrEmpty($pdfFileName)) { $pdfFileName = "${{ github.event.client_payload.pdf_file_name }}" }
 
+          $gdriveId = "${{ github.event.inputs.gdrive_id }}"
+          if ([string]::IsNullOrEmpty($gdriveId)) { $gdriveId = "${{ github.event.client_payload.gdrive_id }}" }
+          
           echo "PRODUCT_NAME=$productName" >> $env:GITHUB_ENV
           echo "IDENTIFIER=$identifier" >> $env:GITHUB_ENV
           echo "WINDOW_TITLE=$windowTitle" >> $env:GITHUB_ENV
-          echo "PDF_FILE_NAME=$pdfFileName" >> $env:GITHUB_ENV  
+          echo "PDF_FILE_NAME=$pdfFileName" >> $env:GITHUB_ENV
+          echo "GDRIVE_ID=$gdriveId" >> $env:GITHUB_ENV
+          
       # 🌟 YENİ ADIM 1: Frontend Build (dist klasörünü oluşturur)
       
       - name: Build Frontend Assets
@@ -80,14 +89,44 @@ jobs:
           } else {
             Write-Host "JS dosyasi bulunamadi, varsayılan PDF kullaniliyor."
           }
+
+     # 🌟 GOOGLE DRIVE'DAN PDF İNDİRME ADIMI
+      - name: Install gdown & Download PDF from Google Drive
+        shell: powershell
+        run: |
+          # Python indirme kütüphanesini yükle
+          python -m pip install gdown
+
+          # public/docs klasörünü oluştur
+          New-Item -ItemType Directory -Force -Path "public/docs"
+
+          # Webhook veya manuel girişten gelen Google Drive File ID
+          $fileId = "${{ github.event.inputs.gdrive_id }}"
+          if ([string]::IsNullOrEmpty($fileId)) { $fileId = "${{ github.event.client_payload.gdrive_id }}" }
+
+          $pdfName = "$env:PDF_FILE_NAME"
+
+          Write-Host "Google Drive'dan indiriliyor... File ID: $fileId"
+          
+          # Google Drive'dan dosyayı indirir ve hedef isme adlandırır
+          gdown --id $fileId -O "public/docs/$pdfName"
+
+          if (Test-Path "public/docs/$pdfName") {
+            Write-Host "PDF basariyla Google Drive'dan indirildi: public/docs/$pdfName"
+          } else {
+            Write-Host "HATA: PDF Google Drive'dan indirilemedi!"
+            exit 1
+          } 
+      # 🌟 TAURI BUILD (ENV DEĞİŞKENLERİ İLE DİNAMİK CONFIG)
       - name: Build Tauri App with Dynamic Config
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.TAURI_TOKEN }}
         with:
           tagName: v1.0.${{ github.run_number }}
-          releaseName: '${{ inputs.product_name }} - v1.0.${{ github.run_number }}'
+          releaseName: '$env:PRODUCT_NAME - v1.0.${{ github.run_number }}'
           releaseDraft: false
           prerelease: false
           # 🌟 DİNAMİK JSON OVERRIDE BURADA YAPILIYOR
-          args: --config '{"productName":"${{ inputs.product_name }}", "identifier":"${{ inputs.identifier }}", "app":{"windows":[{"title":"${{ inputs.window_title }}"}]}}'
+          #args: --config '{"productName":"${{ inputs.product_name }}", "identifier":"${{ inputs.identifier }}", "app":{"windows":[{"title":"${{ inputs.window_title }}"}]}}'
+          args: --config '{"productName":"'$env:PRODUCT_NAME'", "identifier":"'$env:IDENTIFIER'", "app":{"windows":[{"title":"'$env:WINDOW_TITLE'"}]}}'
