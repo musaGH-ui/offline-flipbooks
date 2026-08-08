@@ -44,6 +44,10 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
+        # 🌟 DERLEME SÜRESİNİ 10 DAKİKADAN 2 DAKİKAYA DÜŞÜREN RUST CACHE
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+
       - name: Install dependencies
         run: npm install
         
@@ -84,8 +88,8 @@ jobs:
         run: |
           $jsFile = "renderer.js" # Veya PDF yolunu tanımladığın JS/HTML dosyasının yolu
           if (Test-Path $jsFile) {
-            (Get-Content $jsFile -Raw) -replace 'ACTIVE_PDF_FILE', '${{ inputs.pdf_file_name }}' | Set-Content $jsFile
-            Write-Host "PDF dosyasi başarıyla enjekte edildi: ${{ inputs.pdf_file_name }}"
+            (Get-Content $jsFile -Raw) -replace 'ACTIVE_PDF_FILE', "$env:PDF_FILE_NAME" | Set-Content $jsFile
+            Write-Host "PDF dosyasi basariyla enjekte edildi: $env:PDF_FILE_NAME"
           } else {
             Write-Host "JS dosyasi bulunamadi, varsayılan PDF kullaniliyor."
           }
@@ -101,20 +105,14 @@ jobs:
           New-Item -ItemType Directory -Force -Path "public/docs"
 
           # Webhook veya manuel girişten gelen Google Drive File ID
-          #$fileId = "${{ github.event.inputs.gdrive_id }}"
           $fileId = "$env:GDRIVE_ID"
-          #if ([string]::IsNullOrEmpty($fileId)) { $fileId = "${{ github.event.client_payload.gdrive_id }}" }
-
           $pdfName = "$env:PDF_FILE_NAME"
 
           Write-Host "Google Drive'dan indiriliyor... File ID: $fileId"
           
           # Google Drive'dan dosyayı indirir ve hedef isme adlandırır
-          #gdown --id $fileId -O "public/docs/$pdfName"
-          # Yeni gdown sözdizimi: ID doğrudan indirme URL'si olarak iletilir
           gdown "https://drive.google.com/uc?id=$fileId" -O "public/docs/$pdfName"
           
-
           if (Test-Path "public/docs/$pdfName") {
             Write-Host "PDF basariyla Google Drive'dan indirildi: public/docs/$pdfName"
           } else {
@@ -158,6 +156,4 @@ jobs:
           releaseDraft: false
           prerelease: false
           args: --config temp-config.json
-          # 🌟 DİNAMİK JSON OVERRIDE BURADA YAPILIYOR
-          #args: --config '{"productName":"${{ inputs.product_name }}", "identifier":"${{ inputs.identifier }}", "app":{"windows":[{"title":"${{ inputs.window_title }}"}]}}'
-          #args: --config '{"productName":"'$env:PRODUCT_NAME'", "identifier":"'$env:IDENTIFIER'", "app":{"windows":[{"title":"'$env:WINDOW_TITLE'"}]}}'
+          
