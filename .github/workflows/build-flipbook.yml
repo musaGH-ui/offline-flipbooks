@@ -10,7 +10,7 @@ on:
       identifier:
         description: 'Paket Kimliği (Örn: com.dosdijital.flipbook.alacakdavalari)'
         required: true
-        default: 'com.dosdijital.flipbook.abonelik-söz-kaynak-alacak-d'
+        default: 'com.dosdijital.flipbook.abonelik-soz-kaynak-alacak-d'
       window_title:
         description: 'Pencere Üst Başlığı'
         required: true
@@ -27,9 +27,11 @@ on:
         description: 'Hedef Platform (windows, macos, linux, android)'
         required: true
         default: 'windows'
-  # 🌟 WOOCOMMERCE WEBHOOK TETİKLEYİCİSİ:
+
+  # 🌟 WOOCOMMERCE WEBHOOK TETİKLEYİCİSİ
   repository_dispatch:
     types: [build-flipbook]
+
 jobs:
   # 🌟 PLATFORM TESPİTİ VE İŞLETİM SİSTEMİ EŞLEŞTİRMESİ
   setup-build:
@@ -50,13 +52,14 @@ jobs:
           else
             echo "target_os=windows-latest" >> $GITHUB_OUTPUT
           fi
+
   # 🌟 DİNAMİK MASAÜSTÜ VE MOBİL DERLEMESİ
   build-tauri:
     needs: setup-build
     runs-on: ${{ needs.setup-build.outputs.target_os }}
     permissions:
       contents: write
-      
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -67,13 +70,13 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
-          
+
       - name: Setup Android NDK
         if: needs.setup-build.outputs.target_platform == 'android'
         uses: nsetup/setup-android-ndk@v1
         with:
           ndk-version: r25c
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -83,7 +86,8 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ needs.setup-build.outputs.target_platform == 'android' && 'aarch64-linux-android armv7-linux-androideabi' || '' }}
-        # 🌟 DERLEME SÜRESİNİ 10 DAKİKADAN 2 DAKİKAYA DÜŞÜREN RUST CACHE
+
+      # 🌟 DERLEME SÜRESİNİ DÜŞÜREN RUST CACHE
       - name: Rust cache
         uses: swatinem/rust-cache@v2
 
@@ -92,11 +96,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
-      
+
       - name: Install dependencies
         run: npm install
-        
-      # 🌟 DİNAMİK DEĞİŞKENLERİ HAZIRLAMA (Hem Manuel hem Webhook destekler)
+
+      # 🌟 DİNAMİK DEĞİŞKENLERİ HAZIRLAMA
       - name: Set Build Variables
         shell: bash
         run: |
@@ -111,78 +115,55 @@ jobs:
           echo "WINDOW_TITLE=$WINDOW_TITLE" >> $GITHUB_ENV
           echo "PDF_FILE_NAME=$PDF_FILE_NAME" >> $GITHUB_ENV
           echo "GDRIVE_ID=$GDRIVE_ID" >> $GITHUB_ENV
-          
-      # 🌟 YENİ ADIM 1: Frontend Build (dist klasörünü oluşturur)
-      
+
       - name: Build Frontend Assets
-        run: |
-          npm run build --if-present
-          
-      # 🌟 YENİ ADIM: JS İÇİNDEKİ PDF YOLUNU DİNAMİK OLARAK DEĞİŞTİRİR
+        run: npm run build --if-present
+
+      # 🌟 JS İÇİNDEKİ PDF YOLUNU ENJEKTE ETME (CROSS-PLATFORM BASH)
       - name: Inject Active PDF File Name
-        shell: powershell
+        shell: bash
         run: |
-          $jsFile = "renderer.js" # Veya PDF yolunu tanımladığın JS/HTML dosyasının yolu
-          if (Test-Path $jsFile) {
-            (Get-Content $jsFile -Raw) -replace 'ACTIVE_PDF_FILE', "$env:PDF_FILE_NAME" | Set-Content $jsFile
-            Write-Host "PDF dosyasi basariyla enjekte edildi: $env:PDF_FILE_NAME"
-          } else {
-            Write-Host "JS dosyasi bulunamadi, varsayılan PDF kullaniliyor."
-          }
+          if [ -f "renderer.js" ]; then
+            sed -i "s/ACTIVE_PDF_FILE/$PDF_FILE_NAME/g" renderer.js || sed -i '' "s/ACTIVE_PDF_FILE/$PDF_FILE_NAME/g" renderer.js
+            echo "PDF enjekte edildi: $PDF_FILE_NAME"
+          fi
 
-     # 🌟 GOOGLE DRIVE'DAN PDF İNDİRME ADIMI
+      # 🌟 GOOGLE DRIVE'DAN PDF İNDİRME ADIMI (CROSS-PLATFORM BASH)
       - name: Install gdown & Download PDF from Google Drive
-        shell: powershell
+        shell: bash
         run: |
-          # Python indirme kütüphanesini yükle
-          python -m pip install gdown
-
-          # public/docs klasörünü oluştur
-          New-Item -ItemType Directory -Force -Path "public/docs"
-
-          # Webhook veya manuel girişten gelen Google Drive File ID
-          $fileId = "$env:GDRIVE_ID"
-          $pdfName = "$env:PDF_FILE_NAME"
-
-          Write-Host "Google Drive'dan indiriliyor... File ID: $fileId"
+          python3 -m pip install gdown || python -m pip install gdown
+          mkdir -p public/docs
+          gdown "https://drive.google.com/uc?id=$GDRIVE_ID" -O "public/docs/$PDF_FILE_NAME"
           
-          # Google Drive'dan dosyayı indirir ve hedef isme adlandırır
-          gdown "https://drive.google.com/uc?id=$fileId" -O "public/docs/$pdfName"
-          
-          if (Test-Path "public/docs/$pdfName") {
-            Write-Host "PDF basariyla Google Drive'dan indirildi: public/docs/$pdfName"
-          } else {
-            Write-Host "HATA: PDF Google Drive'dan indirilemedi!"
+          if [ -f "public/docs/$PDF_FILE_NAME" ]; then
+            echo "PDF basariyla indirildi: public/docs/$PDF_FILE_NAME"
+          else
+            echo "HATA: PDF indirilemedi!"
             exit 1
-          } 
+          fi
 
-      # 🌟 YENİ ADIM: Dinamik Config Dosyasını Disk Üzerinde Oluşturma
+      # 🌟 DİNAMİK TAURI CONFIG DOSYASI OLUŞTURMA (CROSS-PLATFORM BASH)
       - name: Generate Dynamic Tauri Config File
-        shell: powershell
+        shell: bash
         run: |
-          # Doğrudan PDF adından (.pdf uzantısı sökülerek) temiz SKU/Slug elde edilir
-          $safeProductName = "$env:PDF_FILE_NAME" -replace '\.pdf$', ''
-          # BOM olmadan UTF-8 yazan özel PowerShell kod bloğu
-          $configObj = @{
-              productName = "$safeProductName"
-              identifier  = "$env:IDENTIFIER"
-              app         = @{
-                  windows = @(
-                      @{ title = "$env:WINDOW_TITLE" }
-                  )
-              }
+          SAFE_PRODUCT_NAME="${PDF_FILE_NAME%.pdf}"
+          
+          cat <<EOF > src-tauri/temp-config.json
+          {
+            "productName": "$SAFE_PRODUCT_NAME",
+            "identifier": "$IDENTIFIER",
+            "app": {
+              "windows": [
+                { "title": "$WINDOW_TITLE" }
+              ]
+            }
           }
-          # JSON'a çevir ve BOM kalıntısı olmadan kaydet
-          $jsonContent = $configObj | ConvertTo-Json -Depth 5
-          $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-          
-          # Dosyayı hem kök hem de src-tauri içine garanti olsun diye yazıyoruz
-          [System.IO.File]::WriteAllText("$PWD/src-tauri/temp-config.json", $jsonContent, $utf8NoBom)
-          [System.IO.File]::WriteAllText("$PWD/temp-config.json", $jsonContent, $utf8NoBom)
+          EOF
+          cp src-tauri/temp-config.json temp-config.json
+          echo "Geçici Config Üretildi:"
+          cat temp-config.json
 
-          Write-Host "Geçici Config Dosyası Üretildi:"
-          Get-Content "src-tauri/temp-config.json"
-          
       # 🌟 MASAÜSTÜ DERLEMESİ (Windows / Mac / Linux)
       - name: Build Tauri Desktop App
         if: needs.setup-build.outputs.target_platform != 'android'
@@ -208,4 +189,3 @@ jobs:
           releaseDraft: false
           prerelease: false
           args: android build --config temp-config.json
-
