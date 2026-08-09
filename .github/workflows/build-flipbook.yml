@@ -1,4 +1,4 @@
-name: On-Demand Flipbook Builder
+name: On-Demand Multi-Platform Flipbook Builder
 
 on:
   workflow_dispatch:
@@ -23,19 +23,57 @@ on:
         description: 'Google Drive File ID'
         required: true
         default: '12bUyssRXoe8gdOA3uCfeBjeutjlkIdWi'
+      platform:
+        description: 'Hedef Platform (windows, macos, linux, android)'
+        required: true
+        default: 'windows'
   # 🌟 WOOCOMMERCE WEBHOOK TETİKLEYİCİSİ:
   repository_dispatch:
     types: [build-flipbook]
 jobs:
+  # 🌟 PLATFORM TESPİTİ VE İŞLETİM SİSTEMİ EŞLEŞTİRMESİ
+  setup-build:
+    runs-on: ubuntu-latest
+    outputs:
+      target_os: ${{ steps.set-os.outputs.target_os }}
+      target_platform: ${{ steps.set-os.outputs.target_platform }}
+    steps:
+      - id: set-os
+        run: |
+          PLATFORM="${{ github.event.inputs.platform || github.event.client_payload.platform || 'windows' }}"
+          echo "target_platform=$PLATFORM" >> $GITHUB_OUTPUT
+          
+          if [ "$PLATFORM" = "macos" ]; then
+            echo "target_os=macos-latest" >> $GITHUB_OUTPUT
+          elif [ "$PLATFORM" = "linux" ] || [ "$PLATFORM" = "android" ]; then
+            echo "target_os=ubuntu-latest" >> $GITHUB_OUTPUT
+          else
+            echo "target_os=windows-latest" >> $GITHUB_OUTPUT
+          fi
+  # 🌟 DİNAMİK MASAÜSTÜ VE MOBİL DERLEMESİ
   build-tauri:
+    needs: setup-build
+    runs-on: ${{ needs.setup-build.outputs.target_os }}
     permissions:
       contents: write
-    runs-on: windows-latest
-
+      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Java JDK (Android İçin)
+        if: needs.setup-build.outputs.target_platform == 'android'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          
+      - name: Setup Android NDK
+        if: needs.setup-build.outputs.target_platform == 'android'
+        uses: nsetup/setup-android-ndk@v1
+        with:
+          ndk-version: r25c
+          
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -43,38 +81,36 @@ jobs:
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-
+        with:
+          targets: ${{ needs.setup-build.outputs.target_platform == 'android' && 'aarch64-linux-android armv7-linux-androideabi' || '' }}
         # 🌟 DERLEME SÜRESİNİ 10 DAKİKADAN 2 DAKİKAYA DÜŞÜREN RUST CACHE
       - name: Rust cache
         uses: swatinem/rust-cache@v2
 
+      - name: Install System Dependencies (Linux Only)
+        if: runner.os == 'Linux' && needs.setup-build.outputs.target_platform != 'android'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
+      
       - name: Install dependencies
         run: npm install
         
       # 🌟 DİNAMİK DEĞİŞKENLERİ HAZIRLAMA (Hem Manuel hem Webhook destekler)
       - name: Set Build Variables
-        shell: powershell
+        shell: bash
         run: |
-          $productName = "${{ github.event.inputs.product_name }}"
-          if ([string]::IsNullOrEmpty($productName)) { $productName = "${{ github.event.client_payload.product_name }}" }
-          
-          $identifier = "${{ github.event.inputs.identifier }}"
-          if ([string]::IsNullOrEmpty($identifier)) { $identifier = "${{ github.event.client_payload.identifier }}" }
-          
-          $windowTitle = "${{ github.event.inputs.window_title }}"
-          if ([string]::IsNullOrEmpty($windowTitle)) { $windowTitle = "${{ github.event.client_payload.window_title }}" }
+          PRODUCT_NAME="${{ github.event.inputs.product_name || github.event.client_payload.product_name }}"
+          IDENTIFIER="${{ github.event.inputs.identifier || github.event.client_payload.identifier }}"
+          WINDOW_TITLE="${{ github.event.inputs.window_title || github.event.client_payload.window_title }}"
+          PDF_FILE_NAME="${{ github.event.inputs.pdf_file_name || github.event.client_payload.pdf_file_name }}"
+          GDRIVE_ID="${{ github.event.inputs.gdrive_id || github.event.client_payload.gdrive_id }}"
 
-          $pdfFileName = "${{ github.event.inputs.pdf_file_name }}"
-          if ([string]::IsNullOrEmpty($pdfFileName)) { $pdfFileName = "${{ github.event.client_payload.pdf_file_name }}" }
-
-          $gdriveId = "${{ github.event.inputs.gdrive_id }}"
-          if ([string]::IsNullOrEmpty($gdriveId)) { $gdriveId = "${{ github.event.client_payload.gdrive_id }}" }
-          
-          echo "PRODUCT_NAME=$productName" >> $env:GITHUB_ENV
-          echo "IDENTIFIER=$identifier" >> $env:GITHUB_ENV
-          echo "WINDOW_TITLE=$windowTitle" >> $env:GITHUB_ENV
-          echo "PDF_FILE_NAME=$pdfFileName" >> $env:GITHUB_ENV
-          echo "GDRIVE_ID=$gdriveId" >> $env:GITHUB_ENV
+          echo "PRODUCT_NAME=$PRODUCT_NAME" >> $GITHUB_ENV
+          echo "IDENTIFIER=$IDENTIFIER" >> $GITHUB_ENV
+          echo "WINDOW_TITLE=$WINDOW_TITLE" >> $GITHUB_ENV
+          echo "PDF_FILE_NAME=$PDF_FILE_NAME" >> $GITHUB_ENV
+          echo "GDRIVE_ID=$GDRIVE_ID" >> $GITHUB_ENV
           
       # 🌟 YENİ ADIM 1: Frontend Build (dist klasörünü oluşturur)
       
@@ -147,15 +183,28 @@ jobs:
           Write-Host "Geçici Config Dosyası Üretildi:"
           Get-Content "src-tauri/temp-config.json"
           
-      # 🌟 TAURI BUILD (ENV DEĞİŞKENLERİ İLE DİNAMİK CONFIG)
-      - name: Build Tauri App with Dynamic Config
+      # 🌟 MASAÜSTÜ DERLEMESİ (Windows / Mac / Linux)
+      - name: Build Tauri Desktop App
+        if: needs.setup-build.outputs.target_platform != 'android'
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.TAURI_TOKEN }}
         with:
           tagName: v1.0.${{ github.run_number }}
-          releaseName: '$env:PRODUCT_NAME - v1.0.${{ github.run_number }}'
+          releaseName: '$PRODUCT_NAME - v1.0.${{ github.run_number }}'
           releaseDraft: false
           prerelease: false
           args: --config temp-config.json
-          
+
+      # 🌟 MOBİL DERLEME (Android APK)
+      - name: Build Tauri Android App
+        if: needs.setup-build.outputs.target_platform == 'android'
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.TAURI_TOKEN }}
+        with:
+          tagName: v1.0.${{ github.run_number }}
+          releaseName: '$PRODUCT_NAME (Android) - v1.0.${{ github.run_number }}'
+          releaseDraft: false
+          prerelease: false
+          args: android build --config temp-config.json
