@@ -208,3 +208,4 @@ jobs:
           releaseDraft: false
           prerelease: false
           args: android build --config temp-config.json
+
