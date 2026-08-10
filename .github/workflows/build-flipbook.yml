@@ -73,9 +73,16 @@ jobs:
 
       - name: Setup Android NDK (Built-in)
         if: needs.setup-build.outputs.target_platform == 'android'
+        shell: bash
         run: |
-          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
-          echo "NDK_HOME=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
+          NDK_PATH="$ANDROID_HOME/ndk-bundle"
+          if [ ! -d "$NDK_PATH" ]; then
+            NDK_PATH=$(ls -d $ANDROID_HOME/ndk/* 2>/dev/null | tail -n 1)
+          fi
+          
+          echo "NDK_HOME=$NDK_PATH" >> $GITHUB_ENV
+          echo "ANDROID_NDK_HOME=$NDK_PATH" >> $GITHUB_ENV
+          echo "Android NDK Yolu Ayarlandı: $NDK_PATH"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
