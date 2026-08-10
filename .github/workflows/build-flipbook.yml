@@ -188,4 +188,4 @@ jobs:
           releaseName: '$PRODUCT_NAME (Android) - v1.0.${{ github.run_number }}'
           releaseDraft: false
           prerelease: false
-          args: android build --config temp-config.json
+          args: android --config temp-config.json
