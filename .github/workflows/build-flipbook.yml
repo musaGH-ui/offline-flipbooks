@@ -189,10 +189,13 @@ jobs:
         if: needs.setup-build.outputs.target_platform == 'android'
         shell: bash
         run: |
-          # 1. Yerel Android proje yapısını GitHub sunucusunda oluştur
+          # 1. Önce geçici config'i tauri.conf.json üzerine kopyala ki init adımı doğru identifier ile klasör oluştursun
+          cp temp-config.json src-tauri/tauri.conf.json
+          
+          # 2. Doğru identifier ile Android projesini ilklendir
           npm run tauri android init
           
-          # 2. APK derlemesini başlat
+          # 3. APK derlemesini başlat
           npm run tauri android build -- --config temp-config.json
 
       # 🌟 ÜRETİLEN APK DOSYASINI GITHUB RELEASES'A YÜKLEME
