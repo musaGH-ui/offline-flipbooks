@@ -179,7 +179,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TAURI_TOKEN }}
         with:
           tagName: v1.0.${{ github.run_number }}
-          releaseName: '$PRODUCT_NAME - v1.0.${{ github.run_number }}'
+          releaseName: '${{ github.event.inputs.product_name || github.event.client_payload.product_name }} - v1.0.${{ github.run_number }}'
           releaseDraft: false
           prerelease: false
           args: --config temp-config.json
@@ -195,7 +195,7 @@ jobs:
           # 2. APK derlemesini başlat
           npm run tauri android build -- --config temp-config.json
           
-       # 🌟 ÜRETİLEN APK DOSYASINI GITHUB RELEASES'A YÜKLEME
+      # 🌟 ÜRETİLEN APK DOSYASINI GITHUB RELEASES'A YÜKLEME
       - name: Upload Android APK to Release
         if: needs.setup-build.outputs.target_platform == 'android'
         uses: softprops/action-gh-release@v1
