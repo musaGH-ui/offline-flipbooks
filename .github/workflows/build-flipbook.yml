@@ -173,7 +173,7 @@ jobs:
 
       # 🌟 MASAÜSTÜ DERLEMESİ (Windows / Mac / Linux)
       - name: Build Tauri Desktop App
-        if: needs.setup-build.outputs.target_platform != 'android'
+        if: needs.setup-build.outputs.target_platform == 'android'
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.TAURI_TOKEN }}
@@ -189,7 +189,7 @@ jobs:
         if: needs.setup-build.outputs.target_platform == 'android'
         shell: bash
         run: |
-          # 1. Önce geçici config'i tauri.conf.json üzerine kopyala ki init adımı doğru identifier ile klasör oluştursun
+          # 1. Önce geçici config'i tauri.conf.json üzerine kopyala
           cp temp-config.json src-tauri/tauri.conf.json
           
           # 2. Doğru identifier ile Android projesini ilklendir
@@ -198,26 +198,35 @@ jobs:
           # 3. APK derlemesini başlat
           npm run tauri android build -- --config temp-config.json
 
-      # 🌟 APK DOSYASINI KİTAP ADINA GÖRE YENİDEN ADLANDIRMA
-      - name: Rename Generated APK
+      # 🌟 APK DOSYASINI İMZALAMA (SIGNING) VE YENİDEN ADLANDIRMA
+      - name: Sign & Rename Generated APK
         if: needs.setup-build.outputs.target_platform == 'android'
         shell: bash
         run: |
           SAFE_NAME="${PDF_FILE_NAME%.pdf}"
           TARGET_APK_NAME="${SAFE_NAME}_1.0.0_apk-universal.apk"
           
-          # Üretilen APK'yı bul ve yeni isme kopyala/taşı
+          # 1. İmzasız APK dosyasını bul
           ORIGINAL_APK=$(find src-tauri/gen/android/app/build/outputs/apk -name "*.apk" | head -n 1)
+          
           if [ -f "$ORIGINAL_APK" ]; then
-            cp "$ORIGINAL_APK" "public/docs/$TARGET_APK_NAME"
-            echo "APK Basariyla Yeniden Adlandirildi: public/docs/$TARGET_APK_NAME"
+            echo "İmzasız APK Bulundu: $ORIGINAL_APK"
+            
+            # 2. Anlık KeyStore (Anahtar Deposu) Oluştur
+            keytool -genkey -v -keystore release.keystore -alias androidkey -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=DosDijital, OU=Flipbook, O=Dos, L=Ankara, C=TR"
+            
+            # 3. APK'yı Otomatik İmza İle İmzala
+            BUILD_TOOLS_DIR=$(ls -d $ANDROID_HOME/build-tools/* | tail -n 1)
+            $BUILD_TOOLS_DIR/apksigner sign --ks release.keystore --ks-pass pass:android --key-pass pass:android --out "public/docs/$TARGET_APK_NAME" "$ORIGINAL_APK"
+            
+            echo "APK Basariyla İmzalandi ve Kaydedildi: public/docs/$TARGET_APK_NAME"
           else
-            echo "HATA: Üretilen APK dosyasi bulunamadi!"
+            echo "HATA: Derlenen APK dosyasi bulunamadi!"
             exit 1
           fi
 
-      # 🌟 ÜRETİLEN APK DOSYASINI GITHUB RELEASES'A YÜKLEME
-      - name: Upload Android APK to Release
+      # 🌟 İMZALANMIŞ APK DOSYASINI GITHUB RELEASES'A YÜKLEME
+      - name: Upload Signed Android APK to Release
         if: needs.setup-build.outputs.target_platform == 'android'
         uses: softprops/action-gh-release@v1
         env:
@@ -225,4 +234,4 @@ jobs:
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: '${{ github.event.inputs.product_name || github.event.client_payload.product_name }} (Android) - v1.0.${{ github.run_number }}'
-          files: src-tauri/gen/android/app/build/outputs/apk/**/*.apk
+          files: public/docs/*_apk-universal.apk
