@@ -198,6 +198,24 @@ jobs:
           # 3. APK derlemesini başlat
           npm run tauri android build -- --config temp-config.json
 
+      # 🌟 APK DOSYASINI KİTAP ADINA GÖRE YENİDEN ADLANDIRMA
+      - name: Rename Generated APK
+        if: needs.setup-build.outputs.target_platform == 'android'
+        shell: bash
+        run: |
+          SAFE_NAME="${PDF_FILE_NAME%.pdf}"
+          TARGET_APK_NAME="${SAFE_NAME}_1.0.0_apk-universal.apk"
+          
+          # Üretilen APK'yı bul ve yeni isme kopyala/taşı
+          ORIGINAL_APK=$(find src-tauri/gen/android/app/build/outputs/apk -name "*.apk" | head -n 1)
+          if [ -f "$ORIGINAL_APK" ]; then
+            cp "$ORIGINAL_APK" "public/docs/$TARGET_APK_NAME"
+            echo "APK Basariyla Yeniden Adlandirildi: public/docs/$TARGET_APK_NAME"
+          else
+            echo "HATA: Üretilen APK dosyasi bulunamadi!"
+            exit 1
+          fi
+
       # 🌟 ÜRETİLEN APK DOSYASINI GITHUB RELEASES'A YÜKLEME
       - name: Upload Android APK to Release
         if: needs.setup-build.outputs.target_platform == 'android'
