@@ -184,7 +184,7 @@ jobs:
           prerelease: false
           args: --config temp-config.json
 
-      # 🌟 MOBİL DERLEME (Android APK- Tauri v2)
+      # 🌟 MOBİL DERLEME (Android APK - Tauri v2)
       - name: Build Tauri Android App
         if: needs.setup-build.outputs.target_platform == 'android'
         shell: bash
@@ -194,7 +194,7 @@ jobs:
           
           # 2. APK derlemesini başlat
           npm run tauri android build -- --config temp-config.json
-          
+
       # 🌟 ÜRETİLEN APK DOSYASINI GITHUB RELEASES'A YÜKLEME
       - name: Upload Android APK to Release
         if: needs.setup-build.outputs.target_platform == 'android'
@@ -204,4 +204,4 @@ jobs:
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: '${{ github.event.inputs.product_name || github.event.client_payload.product_name }} (Android) - v1.0.${{ github.run_number }}'
-          files: src-tauri/gen/android/app/build/outputs/apk/universal/release/*.apk
+          files: src-tauri/gen/android/app/build/outputs/apk/**/*.apk
