@@ -102,7 +102,7 @@ jobs:
         if: runner.os == 'Linux' && needs.setup-build.outputs.target_platform != 'android'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf libglib2.0-dev
 
       - name: Install dependencies
         run: npm install
@@ -173,7 +173,7 @@ jobs:
 
       # 🌟 MASAÜSTÜ DERLEMESİ (Windows / Mac / Linux)
       - name: Build Tauri Desktop App
-        if: needs.setup-build.outputs.target_platform == 'android'
+        if: needs.setup-build.outputs.target_platform != 'android' && needs.setup-build.outputs.target_platform != ''
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.TAURI_TOKEN }}
