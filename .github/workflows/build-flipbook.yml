@@ -6,7 +6,7 @@ on:
       product_name:
         description: 'Kitap Adı (Örn: Abonelik Sozlesmesi Davalari)'
         required: true
-        default: 'Abonelik Söz. Kaynak.Alacak D.'
+        default: 'abonelik-soz-kaynak-alacak-d'
       identifier:
         description: 'Paket Kimliği (Örn: com.dosdijital.flipbook.alacakdavalari)'
         required: true
@@ -73,7 +73,7 @@ jobs:
 
       - name: Setup Android NDK
         if: needs.setup-build.outputs.target_platform == 'android'
-        uses: nsetup/setup-android-ndk@v1
+        uses: nativium/setup-android-ndk@v1
         with:
           ndk-version: r25c
 
