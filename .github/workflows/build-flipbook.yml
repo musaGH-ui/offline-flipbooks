@@ -71,11 +71,11 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Setup Android NDK
+      - name: Setup Android NDK (Built-in)
         if: needs.setup-build.outputs.target_platform == 'android'
-        uses: nativium/setup-android-ndk@v1
-        with:
-          ndk-version: r25c
+        run: |
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
+          echo "NDK_HOME=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
