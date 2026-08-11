@@ -84,6 +84,11 @@ jobs:
           echo "ANDROID_NDK_HOME=$NDK_PATH" >> $GITHUB_ENV
           echo "Android NDK Yolu Ayarlandı: $NDK_PATH"
 
+      # 🌟 EKLENECEK YER: GRADLE CACHE ADIMI
+      - name: Setup Gradle Cache
+        if: needs.setup-build.outputs.target_platform == 'android'
+        uses: gradle/actions/setup-gradle@v3
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -97,7 +102,9 @@ jobs:
       # 🌟 DERLEME SÜRESİNİ DÜŞÜREN RUST CACHE
       - name: Rust cache
         uses: swatinem/rust-cache@v2
-
+        with:
+          workspaces: "src-tauri -> target"
+          
       - name: Install System Dependencies (Linux Only)
         if: runner.os == 'Linux' && needs.setup-build.outputs.target_platform != 'android'
         run: |
