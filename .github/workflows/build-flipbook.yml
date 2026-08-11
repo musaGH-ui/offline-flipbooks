@@ -97,7 +97,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ needs.setup-build.outputs.target_platform == 'android' && 'aarch64-linux-android armv7-linux-androideabi' || '' }}
+          targets: ${{ needs.setup-build.outputs.target_platform == 'android' && 'aarch64-linux-android' || '' }}
 
       # 🌟 DERLEME SÜRESİNİ DÜŞÜREN RUST CACHE
       - name: Rust cache
@@ -220,7 +220,7 @@ jobs:
           prerelease: false
           args: --config temp-config.json
 
-      # 🌟 MOBİL DERLEME (Android APK - Tauri v2)
+      # 🌟 MOBİL DERLEME (Android APK - Tauri v2 - Sadece 64-bit ARM)
       - name: Build Tauri Android App
         if: needs.setup-build.outputs.target_platform == 'android'
         shell: bash
@@ -231,8 +231,8 @@ jobs:
           # 2. Doğru identifier ile Android projesini ilklendir
           npm run tauri android init
           
-          # 3. APK derlemesini başlat
-          npm run tauri android build -- --config temp-config.json
+          # 3. Sadece 64-bit ARM için hızlı APK derlemesi
+          npm run tauri android build -- --target aarch64-linux-android --config temp-config.json
 
       # 🌟 APK DOSYASINI İMZALAMA (SIGNING) VE YENİDEN ADLANDIRMA
       - name: Sign & Rename Generated APK
