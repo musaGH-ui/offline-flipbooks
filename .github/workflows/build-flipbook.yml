@@ -157,6 +157,21 @@ jobs:
             exit 1
           fi
 
+      # 🌟 FRONTEND VARLIKLARINI BİR ARAYA GETİRME (PUBLIC KLASÖRÜ)
+      - name: Prepare Frontend Assets in Public Directory
+        shell: bash
+        run: |
+          # 1. public klasörünün varlığından emin ol
+          mkdir -p public
+          
+          # 2. Kök dizindeki web varlıklarını public klasörüne kopyala
+          cp index.html public/ 2>/dev/null || true
+          cp renderer.js public/ 2>/dev/null || true
+          cp style.css public/ 2>/dev/null || true
+          cp -r assets public/ 2>/dev/null || true
+          
+          echo "Frontend varlıkları public/ klasörüne toplandı."
+
       # 🌟 DİNAMİK TAURI CONFIG DOSYASI OLUŞTURMA (CROSS-PLATFORM BASH)
       - name: Generate Dynamic Tauri Config File
         shell: bash
@@ -169,7 +184,7 @@ jobs:
             "identifier": "$IDENTIFIER",
             "build": {
               "beforeBuildCommand": "",
-              "frontendDist": "../",
+              "frontendDist": "../public",
               "devUrl": "http://localhost:5173"
             },
             "app": {
