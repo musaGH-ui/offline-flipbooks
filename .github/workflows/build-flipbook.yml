@@ -157,19 +157,28 @@ jobs:
             exit 1
           fi
 
-      # 🌟 FRONTEND VARLIKLARINI BİR ARAYA GETİRME (PUBLIC KLASÖRÜ)
+      # 🌟 FRONTEND VE PDF VARLIKLARINI BİR ARAYA GETİRME (PUBLIC KLASÖRÜ)
       - name: Prepare Frontend Assets in Public Directory
         shell: bash
         run: |
           # 1. public klasörünün varlığından emin ol
-          mkdir -p public
+          mkdir -p public/docs
           
           # 2. Kök dizindeki web varlıklarını public klasörüne kopyala
           cp index.html public/ 2>/dev/null || true
           cp renderer.js public/ 2>/dev/null || true
           cp style.css public/ 2>/dev/null || true
+
+          # 3. Eğer pdf.worker.js veya ekstra JS/CSS klasörleri varsa onları da kopyala
           cp -r assets public/ 2>/dev/null || true
-          
+          cp -r pdfjs public/ 2>/dev/null || true
+          cp *.js public/ 2>/dev/null || true
+
+          # 4. Google Drive'dan indirilen PDF'in yerinde olduğunu doğrula
+          echo "Public klasörü içeriği:"
+          ls -la public/
+          echo "Public/docs klasörü içeriği (PDF Kontrolü):"
+          ls -la public/docs/
           echo "Frontend varlıkları public/ klasörüne toplandı."
 
       # 🌟 DİNAMİK TAURI CONFIG DOSYASI OLUŞTURMA (CROSS-PLATFORM BASH)
