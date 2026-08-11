@@ -232,7 +232,7 @@ jobs:
           npm run tauri android init
           
           # 3. Sadece 64-bit ARM için hızlı APK derlemesi
-          npm run tauri android build -- --target aarch64-linux-android --config temp-config.json
+          npm run tauri android build -- --target aarch64 --config temp-config.json
 
       # 🌟 APK DOSYASINI İMZALAMA (SIGNING) VE YENİDEN ADLANDIRMA
       - name: Sign & Rename Generated APK
