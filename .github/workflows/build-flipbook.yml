@@ -173,8 +173,13 @@ jobs:
           cp -r assets public/ 2>/dev/null || true
           cp -r pdfjs public/ 2>/dev/null || true
           cp *.js public/ 2>/dev/null || true
+          
+          # 4. PDF dosyasını garanti için hem public/ hem public/docs/ altına koy
+          if [ -d "public/docs" ]; then
+            cp public/docs/*.pdf public/ 2>/dev/null || true
+          fi
 
-          # 4. Google Drive'dan indirilen PDF'in yerinde olduğunu doğrula
+          # 5. Google Drive'dan indirilen PDF'in yerinde olduğunu doğrula
           echo "Public klasörü içeriği:"
           ls -la public/
           echo "Public/docs klasörü içeriği (PDF Kontrolü):"
