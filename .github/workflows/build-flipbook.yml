@@ -146,8 +146,11 @@ jobs:
       - name: Install gdown & Download PDF from Google Drive
         shell: bash
         run: |
-          python3 -m pip install gdown || python -m pip install gdown
+          # public/docs klasörünü sıfırla (varsa eski tüm PDF'leri temizle)
+          rm -rf public/docs
           mkdir -p public/docs
+
+          python3 -m pip install gdown || python -m pip install gdown
           gdown "https://drive.google.com/uc?id=$GDRIVE_ID" -O "public/docs/$PDF_FILE_NAME"
           
           if [ -f "public/docs/$PDF_FILE_NAME" ]; then
@@ -172,7 +175,6 @@ jobs:
           # 3. Alt klasörleri (js, css, docs) hiyerarşik olarak kopyala
           cp -r js/* public/js/ 2>/dev/null || true
           cp -r css/* public/css/ 2>/dev/null || true
-          cp -r docs/* public/docs/ 2>/dev/null || true
           cp *.js public/ 2>/dev/null || true
           
           # 4. Google Drive'dan indirilen PDF'in yerinde olduğunu doğrula
