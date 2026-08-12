@@ -1,6 +1,7 @@
 name: On-Demand Multi-Platform Flipbook Builder
 
 on:
+  # 🌟 MANUEL TETİKLEME (Testler İçin)
   workflow_dispatch:
     inputs:
       product_name:
@@ -26,9 +27,9 @@ on:
       platform:
         description: 'Hedef Platform (windows, macos, linux, android)'
         required: true
-        default: 'windows'
+        default: 'android'
 
-  # 🌟 WOOCOMMERCE WEBHOOK TETİKLEYİCİSİ
+  # 🌟 WOOCOMMERCE WEBHOOK TETİKLEYİCİSİ (SADECE SİPARİŞLE ÇALIŞIR)
   repository_dispatch:
     types: [build-flipbook]
 
@@ -84,7 +85,6 @@ jobs:
           echo "ANDROID_NDK_HOME=$NDK_PATH" >> $GITHUB_ENV
           echo "Android NDK Yolu Ayarlandı: $NDK_PATH"
 
-      # 🌟 EKLENECEK YER: GRADLE CACHE ADIMI
       - name: Setup Gradle Cache
         if: needs.setup-build.outputs.target_platform == 'android'
         uses: gradle/actions/setup-gradle@v3
@@ -99,7 +99,6 @@ jobs:
         with:
           targets: ${{ needs.setup-build.outputs.target_platform == 'android' && 'aarch64-linux-android' || '' }}
 
-      # 🌟 DERLEME SÜRESİNİ DÜŞÜREN RUST CACHE
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
@@ -133,7 +132,7 @@ jobs:
       - name: Build Frontend Assets
         run: npm run build --if-present
 
-      # 🌟 JS İÇİNDEKİ PDF YOLUNU ENJEKTE ETME (CROSS-PLATFORM BASH)
+      # 🌟 JS İÇİNDEKİ PDF YOLUNU ENJEKTE ETME
       - name: Inject Active PDF File Name
         shell: bash
         run: |
@@ -142,11 +141,10 @@ jobs:
             echo "PDF enjekte edildi: $PDF_FILE_NAME"
           fi
 
-      # 🌟 GOOGLE DRIVE'DAN PDF İNDİRME ADIMI (CROSS-PLATFORM BASH) (public/docs/ KLASÖRÜNE)
+      # 🌟 GOOGLE DRIVE'DAN SADECE SEÇİLEN PDF'İ İNDİRME (public/docs/ KLASÖRÜNE)
       - name: Install gdown & Download PDF from Google Drive
         shell: bash
         run: |
-          # public/docs klasörünü sıfırla (varsa eski tüm PDF'leri temizle)
           rm -rf public/docs
           mkdir -p public/docs
 
@@ -164,27 +162,22 @@ jobs:
       - name: Prepare Frontend Assets in Public Directory
         shell: bash
         run: |
-          # 1. Hedef alt klasörlerin varlığından emin ol
           mkdir -p public/docs public/js public/css
           
-          # 2. Kök dizindeki web varlıklarını public klasörüne kopyala
           cp index.html public/ 2>/dev/null || true
           cp renderer.js public/ 2>/dev/null || true
           cp style.css public/ 2>/dev/null || true
 
-          # 3. Alt klasörleri (js, css, docs) hiyerarşik olarak kopyala
           cp -r js/* public/js/ 2>/dev/null || true
           cp -r css/* public/css/ 2>/dev/null || true
           cp *.js public/ 2>/dev/null || true
           
-          # 4. Google Drive'dan indirilen PDF'in yerinde olduğunu doğrula
           echo "Public klasörü içeriği:"
           ls -la public/
-          echo "Public/docs klasörü içeriği (PDF Kontrolü):"
+          echo "Public/docs klasörü içeriği (Tek PDF Kontrolü):"
           ls -la public/docs/
-          echo "Frontend varlıkları public/ klasörüne toplandı."
 
-      # 🌟 DİNAMİK TAURI CONFIG DOSYASI OLUŞTURMA (CROSS-PLATFORM BASH)
+      # 🌟 DİNAMİK TAURI CONFIG DOSYASI OLUŞTURMA
       - name: Generate Dynamic Tauri Config File
         shell: bash
         run: |
@@ -228,13 +221,8 @@ jobs:
         if: needs.setup-build.outputs.target_platform == 'android'
         shell: bash
         run: |
-          # 1. Önce geçici config'i tauri.conf.json üzerine kopyala
           cp temp-config.json src-tauri/tauri.conf.json
-          
-          # 2. Doğru identifier ile Android projesini ilklendir
           npm run tauri android init
-          
-          # 3. Sadece 64-bit ARM için hızlı APK derlemesi
           npm run tauri android build -- --target aarch64 --config temp-config.json
 
       # 🌟 APK DOSYASINI İMZALAMA (SIGNING) VE YENİDEN ADLANDIRMA
@@ -245,20 +233,17 @@ jobs:
           SAFE_NAME="${PDF_FILE_NAME%.pdf}"
           TARGET_APK_NAME="${SAFE_NAME}_1.0.0_apk-universal.apk"
           
-          # 1. İmzasız APK dosyasını bul
           ORIGINAL_APK=$(find src-tauri/gen/android/app/build/outputs/apk -name "*.apk" | head -n 1)
           
           if [ -f "$ORIGINAL_APK" ]; then
             echo "İmzasız APK Bulundu: $ORIGINAL_APK"
             
-            # 2. Anlık KeyStore (Anahtar Deposu) Oluştur
             keytool -genkey -v -keystore release.keystore -alias androidkey -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=DosDijital, OU=Flipbook, O=Dos, L=Ankara, C=TR"
             
-            # 3. APK'yı Otomatik İmza İle İmzala
             BUILD_TOOLS_DIR=$(ls -d $ANDROID_HOME/build-tools/* | tail -n 1)
-            $BUILD_TOOLS_DIR/apksigner sign --ks release.keystore --ks-pass pass:android --key-pass pass:android --out "public/docs/$TARGET_APK_NAME" "$ORIGINAL_APK"
+            $BUILD_TOOLS_DIR/apksigner sign --ks release.keystore --ks-pass pass:android --key-pass pass:android --out "$TARGET_APK_NAME" "$ORIGINAL_APK"
             
-            echo "APK Basariyla İmzalandi ve Kaydedildi: public/docs/$TARGET_APK_NAME"
+            echo "APK Basariyla İmzalandi: $TARGET_APK_NAME"
           else
             echo "HATA: Derlenen APK dosyasi bulunamadi!"
             exit 1
@@ -273,4 +258,4 @@ jobs:
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: '${{ github.event.inputs.product_name || github.event.client_payload.product_name }} (Android) - v1.0.${{ github.run_number }}'
-          files: public/docs/*_apk-universal.apk
+          files: '*_apk-universal.apk'
