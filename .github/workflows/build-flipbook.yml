@@ -132,14 +132,24 @@ jobs:
       - name: Build Frontend Assets
         run: npm run build --if-present
 
-      # 🌟 JS İÇİNDEKİ PDF YOLUNU ENJEKTE ETME
+      # 🌟 JS İÇİNDEKİ PDF YOLUNU GARANTİLİ ENJEKTE ETME
       - name: Inject Active PDF File Name
         shell: bash
         run: |
+          echo "PDF Enjeksiyonu Baslatiliyor: $PDF_FILE_NAME"
+          
+          # Koktekini degistir
           if [ -f "renderer.js" ]; then
             sed -i "s/ACTIVE_PDF_FILE/$PDF_FILE_NAME/g" renderer.js || sed -i '' "s/ACTIVE_PDF_FILE/$PDF_FILE_NAME/g" renderer.js
-            echo "PDF enjekte edildi: $PDF_FILE_NAME"
           fi
+
+          # Varsa public/ altindakini de degistir (Cifte Guvence)
+          if [ -f "public/renderer.js" ]; then
+            sed -i "s/ACTIVE_PDF_FILE/$PDF_FILE_NAME/g" public/renderer.js || sed -i '' "s/ACTIVE_PDF_FILE/$PDF_FILE_NAME/g" public/renderer.js
+          fi
+
+          echo "--- Enjekte Edilen Satir Kontrolü (renderer.js) ---"
+          grep "pdfUrl" renderer.js || true
 
       # 🌟 GOOGLE DRIVE'DAN SADECE SEÇİLEN PDF'İ İNDİRME (public/docs/ KLASÖRÜNE)
       - name: Install gdown & Download PDF from Google Drive
