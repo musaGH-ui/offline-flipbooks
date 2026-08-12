@@ -142,7 +142,7 @@ jobs:
             echo "PDF enjekte edildi: $PDF_FILE_NAME"
           fi
 
-      # 🌟 GOOGLE DRIVE'DAN PDF İNDİRME ADIMI (CROSS-PLATFORM BASH)
+      # 🌟 GOOGLE DRIVE'DAN PDF İNDİRME ADIMI (CROSS-PLATFORM BASH) (public/docs/ KLASÖRÜNE)
       - name: Install gdown & Download PDF from Google Drive
         shell: bash
         run: |
@@ -161,25 +161,21 @@ jobs:
       - name: Prepare Frontend Assets in Public Directory
         shell: bash
         run: |
-          # 1. public klasörünün varlığından emin ol
-          mkdir -p public/docs
+          # 1. Hedef alt klasörlerin varlığından emin ol
+          mkdir -p public/docs public/js public/css
           
           # 2. Kök dizindeki web varlıklarını public klasörüne kopyala
           cp index.html public/ 2>/dev/null || true
           cp renderer.js public/ 2>/dev/null || true
           cp style.css public/ 2>/dev/null || true
 
-          # 3. Eğer pdf.worker.js veya ekstra JS/CSS klasörleri varsa onları da kopyala
-          cp -r assets public/ 2>/dev/null || true
-          cp -r pdfjs public/ 2>/dev/null || true
+          # 3. Alt klasörleri (js, css, docs) hiyerarşik olarak kopyala
+          cp -r js/* public/js/ 2>/dev/null || true
+          cp -r css/* public/css/ 2>/dev/null || true
+          cp -r docs/* public/docs/ 2>/dev/null || true
           cp *.js public/ 2>/dev/null || true
           
-          # 4. PDF dosyasını garanti için hem public/ hem public/docs/ altına koy
-          if [ -d "public/docs" ]; then
-            cp public/docs/*.pdf public/ 2>/dev/null || true
-          fi
-
-          # 5. Google Drive'dan indirilen PDF'in yerinde olduğunu doğrula
+          # 4. Google Drive'dan indirilen PDF'in yerinde olduğunu doğrula
           echo "Public klasörü içeriği:"
           ls -la public/
           echo "Public/docs klasörü içeriği (PDF Kontrolü):"
