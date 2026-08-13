@@ -1,25 +1,55 @@
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { PageFlip } from "page-flip";
 import * as pdfjsLib from "pdfjs-dist";
-// 1. Yeni Tauri v2 standardına göre pencere modüllerini içe aktarıyoruz
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { LogicalSize } from "@tauri-apps/api/window";
-//import { openUrl } from '@tauri-apps/plugin-opener';
 
+pdfjsLib.GlobalWorkerOptions.workerSrc = './js/pdf.worker.min.mjs';
 // PDF.js v4+ Modül yapısı uyumluluk köprüsü
 /*if (pdfjsLib && !pdfjsLib.TextLayer) {
     pdfjsLib.TextLayer = pdfjsLib.api?.TextLayer || window.pdfjsLib?.TextLayer;
 }*/
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+/*pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.mjs",
   import.meta.url
-).toString();
+).toString();*/
+// 🌟 EKRANIN ALTINA CANLI HATA / LOG BASAN TEŞHİS MOTORU
+function debugLog(step) {
+    console.log("DEBUG:", step);
+    let debugDiv = document.getElementById('app-debug-status');
+    if (!debugDiv) {
+        debugDiv = document.createElement('div');
+        debugDiv.id = 'app-debug-status';
+        debugDiv.style.cssText = 'position:fixed; bottom:10px; left:10px; right:10px; background:rgba(0,0,0,0.9); color:#00ff00; font-family:monospace; font-size:11px; padding:10px; border-radius:5px; z-index:99999; word-break:break-all; max-height:180px; overflow-y:auto; border:1px solid #00ff00;';
+        if (document.body) {
+            document.body.appendChild(debugDiv);
+        } else {
+            window.addEventListener('DOMContentLoaded', () => document.body.appendChild(debugDiv));
+        }
+    }
+    debugDiv.innerHTML += `<div>> ${step}</div>`;
+    debugDiv.scrollTop = debugDiv.scrollHeight;
+}
+
+// Global Yakalanamayan Hataları Yakala ve Ekrana Bas
+/*window.addEventListener('error', function(e) {
+    debugLog("🚨 GLOBAL HATA: " + e.message + " (" + e.filename + ":" + e.lineno + ")");
+});*/
+
+/*window.addEventListener('unhandledrejection', function(e) {
+    debugLog("🚨 PROMISE HATA: " + (e.reason ? (e.reason.message || JSON.stringify(e.reason)) : e));
+});*/
+
+//debugLog("1. renderer.js yuklendi.");
+
+
 
 let pdfDoc = null;
 let totalPages = null;
 let pageFlipInstance = null;
-const pdfUrl = `./docs/abonelik-sozlesmesinden-kaynaklanan-alacak-davalari.pdf?t=${new Date().getTime()}`;
+//const pdfUrl = `./docs/husumet-izni-d.pdf?t=${new Date().getTime()}`;
+const pdfUrl = 'docs/ACTIVE_PDF_FILE';
 // 2. Kullanıcının ekranda ve pencere başlığında göreceği şık Türkçe başlık
 const displayTitle = "ABONELİK SÖZLEŞMESİNDEN KAYNAKLANAN ALACAK DAVALARI";
 
@@ -59,6 +89,8 @@ async function setResponsiveWindow() {
 // 1. UYGULAMA BAŞLANGICI VE PANEL YÖNETİMİ
 // =========================================================================
 window.addEventListener('DOMContentLoaded', async() => {
+	// DOMContentLoaded içindeki ilk satır:
+	debugLog("2. DOMContentLoaded tetiklendi.");
 	// 🌟 ÖNCE pencerenin responsive olarak ekrana oturmasını KESİN olarak bekliyoruz
     try {
         // Pencerenin oturmasını kesin olarak bekliyoruz (Tek satır olarak)
@@ -337,21 +369,81 @@ window.addEventListener('DOMContentLoaded', async() => {
 // 2. PDF YÜKLEME VE KÜÇÜK RESİM SENKRONİZASYONU
 // =========================================================================
 async function loadPDF(url) {
+	// loadPDF(url) içindeki ilk satır:
+	debugLog("3. loadPDF cagirildi. Yol: " + url);
+    const loadingScreen = document.getElementById('pdf-loading-screen');
+    const loadingProgress = document.getElementById('pdf-loading-progress');
+
     try {
-        pdfDoc = await pdfjsLib.getDocument({url}).promise;
+        console.log("PDF Yükleme Başlatıldı:", url);
+
+        // 1. Önce XHR/Fetch ile dosyayı bir ArrayBuffer tamponuna (RAM) çekmeyi dene
+        let pdfData = null;
+
+        try {
+            const response = await fetch(url, { cache: 'no-store' });
+            if (response.ok) {
+                pdfData = await response.arrayBuffer();
+                console.log("PDF Fetch ile ArrayBuffer olarak okundu, Boyut:", pdfData.byteLength);
+            } else {
+                throw new Error("HTTP yanıtı başarısız: " + response.status);
+            }
+        } catch (fetchErr) {
+            console.warn("Standart fetch başarısız, XHR fallback deneniyor:", fetchErr);
+            
+            // Android WebView için %100 Garantili XHR ArrayBuffer Okuyucu
+            pdfData = await new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.responseType = 'arraybuffer';
+                xhr.onload = function() {
+                    if (this.status === 200 || this.status === 0) { // Local file için status 0 gelebilir
+                        resolve(this.response);
+                    } else {
+                        reject(new Error("XHR Hatası: " + this.status));
+                    }
+                };
+                xhr.onerror = function(e) { reject(e); };
+                xhr.send();
+            });
+        }
+
+        if (!pdfData || pdfData.byteLength === 0) {
+            throw new Error("PDF verisi boş veya okunamadı!");
+        }
+
+        // 2. PDF.js'e Yolu (URL) DEĞİL, Doğrudan Hafızadaki Binary Veriyi (data) Veriyoruz!
+        // Bu sayede PDF.js WebView'dan bağımsız olarak RAM'deki dosyayı %100 çözer!
+        const loadingTask = pdfjsLib.getDocument({
+            data: new Uint8Array(pdfData), // 🔑 KESİN ÇÖZÜM: URL YERİNE RAM DİZİSİ
+            disableWorker: true,
+            disableAutoFetch: true,
+            disableStream: true
+        });
+
+        pdfDoc = await loadingTask.promise;
         totalPages = pdfDoc.numPages;
-        document.getElementById('total-pages').innerText = totalPages;
         
-        // Önce sayfaları doğal akışta kusursuzca render edip, flipbook'u ardından başlatıyoruz
+        const totalPagesSpan = document.getElementById('total-pages');
+        if (totalPagesSpan) totalPagesSpan.innerText = totalPages;
+        
         await initFlipbook();
-        
         generateThumbnails(totalPages, pdfDoc);
         
     } catch (error) {
-        console.error("PDF yüklenirken hata oluştu:", error);
+        console.error("PDF Yükleme Mimarisi Kilitlendi / Hata Alındı:", error);
+        
+        if (loadingScreen) {
+            loadingScreen.innerHTML = `
+                <div style="color: #ff4444; padding: 20px; text-align: center; font-family: sans-serif;">
+                    <h3>PDF Yüklenemedi</h3>
+                    <p style="font-size: 13px; color: #ccc;">Dosya okuma engeline takıldı.</p>
+                    <p style="font-size: 11px; color: #888; word-break: break-all;">${error.message || error}</p>
+                </div>
+            `;
+        }
     }
 }
-
 async function generateThumbnails(totalPages, pdfDoc) {
     const container = document.getElementById('thumbnails-list');
     if (!container) return;
@@ -464,7 +556,7 @@ async function initFlipbook() {
 		finalWidth = targetHeight * aspectRatio;
 	}
     // 🌟 ARTIK HARFLER %100 KUSURSUZ ÇİZİLDİ! Şimdi kütüphaneyi güvenle ayağa kaldırabiliriz.
-    pageFlipInstance = new St.PageFlip(container, {
+    pageFlipInstance = new PageFlip(container, {
         width: Math.round(finalWidth / 2),  // Kütüphane iki sayfa açtığı için genişliği ikiye bölüyoruz
         height: Math.round(finalHeight),
         size: "fixed",
