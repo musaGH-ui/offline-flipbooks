@@ -2,7 +2,7 @@ import { openUrl } from '@tauri-apps/plugin-opener';
 import { PageFlip } from "page-flip";
 import * as pdfjsLib from "pdfjs-dist";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
+import { LogicalSize } from "@tauri-apps/api/window";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = './js/pdf.worker.min.mjs';
 // PDF.js v4+ Modül yapısı uyumluluk köprüsü
