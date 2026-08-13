@@ -2,7 +2,7 @@ import { openUrl } from '@tauri-apps/plugin-opener';
 import { PageFlip } from "page-flip";
 import * as pdfjsLib from "pdfjs-dist";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { LogicalSize } from "@tauri-apps/api/window";
+import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = './js/pdf.worker.min.mjs';
 // PDF.js v4+ Modül yapısı uyumluluk köprüsü
@@ -21,7 +21,7 @@ function debugLog(step) {
     if (!debugDiv) {
         debugDiv = document.createElement('div');
         debugDiv.id = 'app-debug-status';
-        debugDiv.style.cssText = 'position:fixed; bottom:10px; left:10px; right:10px; background:rgba(0,0,0,0.9); color:#00ff00; font-family:monospace; font-size:11px; padding:10px; border-radius:5px; z-index:99999; word-break:break-all; max-height:180px; overflow-y:auto; border:1px solid #00ff00;';
+        debugDiv.style.cssText = 'position:fixed; top:0; left:0; right:0; background:rgba(0,0,0,0.9); color:#00ff00; font-family:monospace; font-size:10px; padding:6px 10px; z-index:999999; word-break:break-all; max-height:100px; overflow-y:auto; border-bottom:2px solid #00ff00; pointer-events:none;';
         if (document.body) {
             document.body.appendChild(debugDiv);
         } else {
@@ -33,15 +33,15 @@ function debugLog(step) {
 }
 
 // Global Yakalanamayan Hataları Yakala ve Ekrana Bas
-/*window.addEventListener('error', function(e) {
+window.addEventListener('error', function(e) {
     debugLog("🚨 GLOBAL HATA: " + e.message + " (" + e.filename + ":" + e.lineno + ")");
-});*/
+});
 
-/*window.addEventListener('unhandledrejection', function(e) {
+window.addEventListener('unhandledrejection', function(e) {
     debugLog("🚨 PROMISE HATA: " + (e.reason ? (e.reason.message || JSON.stringify(e.reason)) : e));
-});*/
+});
 
-//debugLog("1. renderer.js yuklendi.");
+debugLog("1. renderer.js yuklendi.");
 
 
 
