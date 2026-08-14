@@ -33,15 +33,15 @@ function debugLog(step) {
 }
 
 // Global Yakalanamayan Hataları Yakala ve Ekrana Bas
-window.addEventListener('error', function(e) {
+/*window.addEventListener('error', function(e) {
     debugLog("🚨 GLOBAL HATA: " + e.message + " (" + e.filename + ":" + e.lineno + ")");
-});
+});*/
 
-window.addEventListener('unhandledrejection', function(e) {
+/*window.addEventListener('unhandledrejection', function(e) {
     debugLog("🚨 PROMISE HATA: " + (e.reason ? (e.reason.message || JSON.stringify(e.reason)) : e));
-});
+});*/
 
-debugLog("1. renderer.js yuklendi.");
+//debugLog("1. renderer.js yuklendi.");
 
 
 
@@ -306,63 +306,59 @@ window.addEventListener('DOMContentLoaded', async() => {
 
     // Uygulama başladığında mağaza yükleme motorunu çalıştır
     loadShopItems();
-	// 🌐 %100 Garantili Dış Bağlantı Açıcı (Rust Command)
-	const handleExternalLink = (targetUrl) => {
-		if (!targetUrl || targetUrl === '#' || targetUrl.startsWith('javascript:')) return;
-
-		// 1. Tauri Ortamı (Doğrudan İşletim Sistemine Tetik Gönderir)
-		if (window.__TAURI_INTERNALS__ || window.__TAURI__) {
-			try {
-				const invoke = window.__TAURI_INTERNALS__?.invoke || window.__TAURI__?.core?.invoke;
-				if (invoke) {
-					invoke('open_in_browser', { url: targetUrl });
-					return;
-				}
-			} catch (err) {
-				console.error("Rust komut hatası:", err);
-			}
-		}
-
-		// 2. Electron Ortamı
-		if (window.require) {
-			try {
-				const { shell } = window.require('electron');
-				shell.openExternal(targetUrl);
-				return;
-			} catch (e) {}
-		}
-
-		// 3. Normal Tarayıcı Fallback
-		window.open(targetUrl, '_blank');
-	};//const handleExternalLink = (targetUrl) => {
 	
-	// 2. Logo Tıklama Dinleyicisi
-	const logoLink = document.getElementById('brand-logo-link');
-	if (logoLink) {
-		logoLink.addEventListener('click', async (e) => {
-		e.preventDefault();
-		try {
-            await handleExternalLink('https://dosdijitalyayincilik.com');
+    // 🌐 %100 Garantili Dış Bağlantı Açıcı (Tauri v2 + Electron + Fallback)
+    const handleExternalLink = async (targetUrl) => {
+        if (!targetUrl || targetUrl === '#' || targetUrl.startsWith('javascript:')) return;
+
+        // 1. Tauri v2 Ortamı (Resmi Opener Plugin Çağrısı)
+        try {
+            if (openUrl) {
+                await openUrl(targetUrl);
+                return;
+            }
         } catch (err) {
-            console.error("Logo linki açılırken hata oluştu:", err);
+            console.warn("Tauri openUrl çalışmadı, fallback deneniyor:", err);
         }
-		});
-	}
-  
-	// 3. Mağaza Paneli "İncele" Butonları (Dinamik Liste Yakalayıcı)
-	document.body.addEventListener('click', (e) => {
-    // Tıklanan eleman veya onun kapsayıcısı .btn-buy-now, .shop-inspect-btn veya .btn-inspect mi?
-    const btn = e.target.closest('.btn-buy-now, .shop-inspect-btn, .btn-inspect');
-    
-    if (btn) {
-      e.preventDefault();
-      // Link değerini href attribute'undan güvenle çekiyoruz
-      const destination = btn.getAttribute('href') || btn.dataset.link;
-      if (destination) {
-        handleExternalLink(destination);
-      }
-    }
-  });
+
+        // 2. Electron Ortamı
+        if (window.require) {
+            try {
+                const { shell } = window.require('electron');
+                shell.openExternal(targetUrl);
+                return;
+            } catch (e) {}
+        }
+
+        // 3. Normal Tarayıcı Fallback
+        window.open(targetUrl, '_blank');
+    }; //const handleExternalLink = async (targetUrl) => {
+
+    // 2. Logo Tıklama Dinleyicisi
+    const logoLink = document.getElementById('brand-logo-link');
+    if (logoLink) {
+        logoLink.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const destination = logoLink.getAttribute('href') || 'https://dosdijitalyayincilik.com';
+            await handleExternalLink(destination);
+        });
+    } //if (logoLink) {
+
+    // 3. Mağaza Paneli "İncele" Butonları (Dinamik Liste Yakalayıcı)
+    document.body.addEventListener('click', async (e) => {
+        // Tıklanan eleman veya onun kapsayıcısı bir incele butonu veya harici link mi?
+        const btn = e.target.closest('.btn-buy-now, .shop-inspect-btn, .btn-inspect, a[href^="http"]');
+        
+        if (btn) {
+            e.preventDefault();
+            // Link değerini href veya data-link attribute'undan güvenle çekiyoruz
+            const destination = btn.getAttribute('href') || btn.dataset.link;
+            if (destination) {
+                await handleExternalLink(destination);
+            }
+        }
+    }); //document.body.addEventListener('click', async (e) => {
+	
 });//window.addEventListener('DOMContentLoaded', async() => {
 
 // =========================================================================
