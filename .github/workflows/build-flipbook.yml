@@ -174,13 +174,10 @@ jobs:
         run: |
           mkdir -p public/docs public/js public/css
           
-          cp index.html public/ 2>/dev/null || true
-          cp renderer.js public/ 2>/dev/null || true
-          cp style.css public/ 2>/dev/null || true
-
+          # Statik JS/CSS kütüphaneleri varsa kopyala (Kök dizindeki renderer.js veya index.html KOPYALANMAZ!)
           cp -r js/* public/js/ 2>/dev/null || true
           cp -r css/* public/css/ 2>/dev/null || true
-          cp *.js public/ 2>/dev/null || true
+          
           
           echo "Public klasörü içeriği:"
           ls -la public/

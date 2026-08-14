@@ -1,5 +1,5 @@
 {
-  "$schema": "../gen/schemas/desktop-schema.json",
+  "$schema": "../gen/schemas/config.schema.json",
   "productName": "DOS Flipbook",
   "version": "1.0.0",
   "identifier": "com.dos.flipbook.app",
