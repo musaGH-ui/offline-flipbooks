@@ -370,14 +370,24 @@ async function loadPDF(url) {
     const loadingScreen = document.getElementById('pdf-loading-screen');
     const loadingProgress = document.getElementById('pdf-loading-progress');
 
+    // 🔑 KESİN DOSYA YOLU ÇÖZÜCÜ (WebView Uyumlu)
+    // Eğer gelen url "/docs/..." veya "docs/..." ise bunu tauri.localhost protokolüyle tam URL yapar.
+    let absoluteUrl = url;
     try {
-        console.log("PDF Yükleme Başlatıldı:", url);
+        absoluteUrl = new URL(url, window.location.href).href;
+    } catch (e) {
+        console.warn("URL dönüştürme hatası, ham yol kullanılacak:", e);
+    }
+
+
+    try {
+        console.log("PDF Yükleme Başlatıldı (Mutlak Yol):", absoluteUrl);
 
         // 1. Önce XHR/Fetch ile dosyayı bir ArrayBuffer tamponuna (RAM) çekmeyi dene
         let pdfData = null;
 
         try {
-            const response = await fetch(url, { cache: 'no-store' });
+            const response = await fetch(absoluteUrl, { cache: 'no-store' });
             if (response.ok) {
                 pdfData = await response.arrayBuffer();
                 console.log("PDF Fetch ile ArrayBuffer olarak okundu, Boyut:", pdfData.byteLength);
@@ -390,7 +400,7 @@ async function loadPDF(url) {
             // Android WebView için %100 Garantili XHR ArrayBuffer Okuyucu
             pdfData = await new Promise((resolve, reject) => {
                 const xhr = new XMLHttpRequest();
-                xhr.open('GET', url, true);
+                xhr.open('GET', absoluteUrl, true);
                 xhr.responseType = 'arraybuffer';
                 xhr.onload = function() {
                     if (this.status === 200 || this.status === 0) { // Local file için status 0 gelebilir
