@@ -84,7 +84,21 @@ async function setResponsiveWindow() {
 
 // Uygulama yüklenir yüklenmez çalıştır
 //setResponsiveWindow();
-
+// 🆔 Cihaz Benzersiz Kimliği (Device Fingerprint) Çıkarıcı
+function getOrCreateDeviceId() {
+    let deviceId = localStorage.getItem('DOS_Device_ID');
+    if (!deviceId) {
+        // Cihaza özel rastgele ve benzersiz UUID türet
+        const userAgent = navigator.userAgent;
+        const screenRes = `${window.screen.width}x${window.screen.height}`;
+        const randomPart = Math.random().toString(36).substring(2, 15);
+        const timeStamp = Date.now().toString(36);
+        
+        deviceId = 'DEV-' + btoa(`${screenRes}-${randomPart}-${timeStamp}`).replace(/=/g, '').substring(0, 32);
+        localStorage.setItem('DOS_Device_ID', deviceId);
+    }
+    return deviceId;
+}
 // =========================================================================
 // 1. UYGULAMA BAŞLANGICI VE PANEL YÖNETİMİ
 // =========================================================================
@@ -99,12 +113,79 @@ window.addEventListener('DOMContentLoaded', async() => {
         console.error("Pencere boyutlandırılırken hata:", windowError);
     }
 	
-	// HTML'de flipbook'un üstüne koyduğumuz başlık alanını günceller
 	
 	// Uygulama penceresinin üst çerçevesini de günceller
 	document.title = displayTitle;
+
+    //Lisans aktivasyonu
+    const productName = pdfUrl.split('/').pop().replace('.pdf', '');
+    const isActivated = localStorage.getItem('UrunuSatinAlan') === 'true';
+    const licenseModal = document.getElementById('license-modal');
+
+    // 1. Aktivasyon Durum Kontrolü
+    if (!isActivated) {
+        if (licenseModal) licenseModal.style.display = 'flex';
+    } else {
+        if (licenseModal) licenseModal.style.display = 'none';
+        await loadPDF(pdfUrl);
+    }
+
+    // 2. Aktivasyon Form Onayı
+    const submitBtn = document.getElementById('lic-submit-btn');
+    if (submitBtn) {
+        submitBtn.addEventListener('click', async () => {
+            const email = document.getElementById('lic-email').value.trim();
+            const key = document.getElementById('lic-key').value.trim();
+            const errorDiv = document.getElementById('lic-error-msg');
+
+            errorDiv.innerText = '';
+
+            if (!email || !key) {
+                errorDiv.innerText = 'Lütfen e-posta ve lisans anahtarınızı girin.';
+                return;
+            }
+
+            submitBtn.innerText = 'Doğrulanıyor...';
+            submitBtn.disabled = true;
+
+            // 🔑 Benzersiz Cihaz ID'sini Al
+            const currentDeviceId = getOrCreateDeviceId();
+
+            try {
+                const response = await fetch('https://dosdijitalyayincilik.com/wp-json/dos/v1/verify-license', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email,
+                        product_name: productName,
+                        license_key: key,
+                        device_id: currentDeviceId // REST API'ye Cihaz ID'si Gönderiliyor!
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    localStorage.setItem('UrunuSatinAlan', 'true');
+                    localStorage.setItem('LicenseUser', email);
+                    
+                    if (licenseModal) licenseModal.style.display = 'none';
+                    await loadPDF(pdfUrl);
+                } else {
+                    // Cihaz uyuşmazlığı veya hatalı anahtar uyarısını göster
+                    errorDiv.innerText = data.message || 'Lisans doğrulanamadı.';
+                }
+            } catch (err) {
+                console.error("Aktivasyon Hatası:", err);
+                errorDiv.innerText = 'Bağlantı hatası! İnternet bağlantınızı kontrol edin.';
+            } finally {
+                submitBtn.innerText = 'Aktivasyonu Tamamla';
+                submitBtn.disabled = false;
+            }
+        });
+    }
     // Tarayıcı zoom'unu bozmadan her şeyi orijinal piksellerinde (%100) bırakıyoruz
-    loadPDF(pdfUrl);
+    //loadPDF(pdfUrl);
     
     const btnThumbnails = document.getElementById('btn-toggle-thumbnails');
     const btnSearch = document.getElementById('btn-toggle-search');

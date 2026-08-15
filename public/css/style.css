@@ -1089,3 +1089,93 @@ button#btn-toggle-shop i {
     transform-origin: left top;
   }
 }
+
+/* Lisans Overlay (Tüm Ekranı Kaplar) */
+.license-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.85); /* Koyu mat şeffaf arka plan */
+  backdrop-filter: blur(8px); /* Arkadaki PDF'i hafif bulanıklaştırır */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999; /* Her şeyin üstünde kalmasını sağlar */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Aktivasyon Kutusu */
+.license-box {
+  background: #ffffff;
+  padding: 32px 28px;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.license-box h2 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: #0f172a;
+  font-size: 1.5rem;
+}
+
+.license-box p {
+  color: #64748b;
+  font-size: 0.92rem;
+  margin-bottom: 24px;
+}
+
+.license-box input {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.license-box input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.license-box button {
+  width: 100%;
+  padding: 14px;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.license-box button:hover {
+  background-color: #1d4ed8;
+}
+
+.license-box button:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* Hata Mesajı Alanı */
+.error-msg {
+  color: #ef4444;
+  font-size: 0.88rem;
+  margin-top: 14px;
+  font-weight: 500;
+  min-height: 20px;
+}

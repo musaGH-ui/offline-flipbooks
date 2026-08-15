@@ -36,6 +36,19 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi">
 </head>
 <body>
+	<!-- Lisans Aktivasyon Modalı (Ekranı Kaplayan Overlay) -->
+  <div id="license-modal" class="license-overlay" style="display: none;">
+    <div class="license-box">
+      <h2>🔑 Uygulama Aktivasyonu</h2>
+      <p>Lütfen satın alırken kullandığınız bilgileri giriniz.</p>
+      
+      <input type="email" id="lic-email" placeholder="E-Posta Adresiniz" required />
+      <input type="text" id="lic-key" placeholder="Lisans Anahtarınız (DOS-XXXX-XXXX-XXXX)" required />
+      
+      <button id="lic-submit-btn">Aktivasyonu Tamamla</button>
+      <div id="lic-error-msg" class="error-msg"></div>
+    </div>
+  </div>
 	<div class="brand-header-container">
 		<a href="https://dosdijitalyayincilik.com" id="brand-logo-link" target="_blank" class="brand-logo-wrapper" title="DOS Dijital Yayıncılık Web Sitesi">
 			<img src="/images/Logo_512x800-Photoroom.png" alt="DOS Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
