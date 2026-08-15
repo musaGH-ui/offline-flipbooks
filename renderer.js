@@ -715,7 +715,7 @@ async function initFlipbook() {
     const flipbookContainer = document.getElementById('flipbook-container');
 	const mainContentArea = document.querySelector('.main-content');
     document.getElementById('btn-zoom-in').addEventListener('click', () => {
-        if (zoomLevel < 2.2) {// Göz yormayacak maksimum zoom sınırı
+        if (zoomLevel < 3.2) {// Göz yormayacak maksimum zoom sınırı
             zoomLevel += 0.20;// Her tıkta %20 büyüt
             flipbookContainer.style.transform = `scale(${zoomLevel})`;
             flipbookContainer.style.transformOrigin = 'center center';
