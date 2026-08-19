@@ -57,6 +57,43 @@ const displayTitle = "ABONELİK SÖZLEŞMESİNDEN KAYNAKLANAN ALACAK DAVALARI";
 let currentSearchTerm = "";
 const pageRenderLocks = {}; // Mükerrer render isteklerini engelleme kilidi
 
+// 🌐 %100 Garantili Dış Bağlantı Açıcı (Android Webview Fix + Tauri v2 + Fallback)
+const handleExternalLink = async (targetUrl) => {
+	if (!targetUrl || targetUrl === '#' || targetUrl.startsWith('javascript:')) return;
+
+	// 1. Tauri v2 Opener Plugin
+	try {
+		if (typeof openUrl === 'function') {
+			await openUrl(targetUrl);
+			return;
+		}
+	} catch (err) {
+		console.warn("Tauri openUrl hatası, fallback deneniyor:", err);
+	}
+
+	// 2. Electron Ortamı
+	if (window.require) {
+		try {
+			const { shell } = window.require('electron');
+			shell.openExternal(targetUrl);
+			return;
+		} catch (e) {}
+	}
+	
+	// 3. Android WebView Fallback (Cihazın varsayılan tarayıcısını dışarıdan açmaya zorlar)
+	const isAndroid = /Android/i.test(navigator.userAgent);
+	if (isAndroid && targetUrl.startsWith('http')) {
+		// HTTP/HTTPS URL'yi Android Chrome/System Browser Intent'ine çevirir
+		const cleanUrl = targetUrl.replace(/^https?:\/\//, '');
+		const isHttps = targetUrl.startsWith('https');
+		const intentUrl = `intent://${cleanUrl}#Intent;scheme=${isHttps ? 'https' : 'http'};action=android.intent.action.VIEW;end`;
+		
+		window.location.href = intentUrl;
+		return;
+	}
+	// 4. Masaüstü Tarayıcı Fallback
+	window.open(targetUrl, '_blank', 'noopener,noreferrer');
+}; //const handleExternalLink = async (targetUrl) => {
 async function setResponsiveWindow() {
     try {
         // 1. Tauri ortamında olup olmadığımızı kontrol eden pürüzsüz kalkan
@@ -388,45 +425,7 @@ window.addEventListener('DOMContentLoaded', async() => {
     // Uygulama başladığında mağaza yükleme motorunu çalıştır
     loadShopItems();
 	
-    // 🌐 %100 Garantili Dış Bağlantı Açıcı (Android Webview Fix + Tauri v2 + Fallback)
-    const handleExternalLink = async (targetUrl) => {
-        if (!targetUrl || targetUrl === '#' || targetUrl.startsWith('javascript:')) return;
-
-		if (!targetUrl || targetUrl === '#' || targetUrl.startsWith('javascript:')) return;
-
-		// 1. Tauri v2 Opener Plugin
-		try {
-			if (typeof openUrl === 'function') {
-				await openUrl(targetUrl);
-				return;
-			}
-		} catch (err) {
-			console.warn("Tauri openUrl hatası, fallback deneniyor:", err);
-		}
-
-        // 2. Electron Ortamı
-        if (window.require) {
-            try {
-                const { shell } = window.require('electron');
-                shell.openExternal(targetUrl);
-                return;
-            } catch (e) {}
-        }
-        
-        // 3. Android WebView Fallback (Cihazın varsayılan tarayıcısını dışarıdan açmaya zorlar)
-        const isAndroid = /Android/i.test(navigator.userAgent);
-        if (isAndroid && targetUrl.startsWith('http')) {
-            // HTTP/HTTPS URL'yi Android Chrome/System Browser Intent'ine çevirir
-            const cleanUrl = targetUrl.replace(/^https?:\/\//, '');
-            const isHttps = targetUrl.startsWith('https');
-            const intentUrl = `intent://${cleanUrl}#Intent;scheme=${isHttps ? 'https' : 'http'};action=android.intent.action.VIEW;end`;
-            
-            window.location.href = intentUrl;
-            return;
-        }
-        // 4. Masaüstü Tarayıcı Fallback
-        window.open(targetUrl, '_blank', 'noopener,noreferrer');
-    }; //const handleExternalLink = async (targetUrl) => {
+    
 
     // 2. Logo Tıklama Dinleyicisi
     const logoLink = document.getElementById('brand-logo-link');
