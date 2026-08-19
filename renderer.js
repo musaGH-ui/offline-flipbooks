@@ -392,18 +392,21 @@ window.addEventListener('DOMContentLoaded', async() => {
     const handleExternalLink = async (targetUrl) => {
         if (!targetUrl || targetUrl === '#' || targetUrl.startsWith('javascript:')) return;
 
-        // 1. Tauri v2 Ortamı (Resmi Opener Plugin Çağrısı)
-        try {
-            if (typeof openUrl === 'function') {
-                await openUrl(targetUrl);
-                return;
-            } else if (window.__TAURI_PLUGIN_OPENER__ && window.__TAURI_PLUGIN_OPENER__.openUrl) {
-                await window.__TAURI_PLUGIN_OPENER__.openUrl(targetUrl);
-                return;
-            }
-        } catch (err) {
-            console.warn("Tauri openUrl çalışmadı, fallback deneniyor:", err);
+        // 1. Tauri v2 Opener Plugin Kontrolü (ReferenceError fırlatmayacak güvenli kontrol)
+    try {
+        if (window.__TAURI_INTERNALS__ && window.__TAURI_INTERNALS__.plugins && window.__TAURI_INTERNALS__.plugins.opener) {
+            await window.__TAURI_INTERNALS__.plugins.opener.openUrl(targetUrl);
+            return;
+        } else if (window.__TAURI__ && window.__TAURI__.opener) {
+            await window.__TAURI__.opener.openUrl(targetUrl);
+            return;
+        } else if (typeof openUrl === 'function') {
+            await openUrl(targetUrl);
+            return;
         }
+    } catch (err) {
+        console.warn("Tauri openUrl çalışmadı, fallback deneniyor:", err);
+    }
 
         // 2. Electron Ortamı
         if (window.require) {
@@ -440,19 +443,21 @@ window.addEventListener('DOMContentLoaded', async() => {
     } //if (logoLink) {
 
     // 3. Mağaza Paneli "İncele" Butonları (Dinamik Liste Yakalayıcı)
-    document.body.addEventListener('click', async (e) => {
-        // Tıklanan eleman veya onun kapsayıcısı bir incele butonu veya harici link mi?
-        const btn = e.target.closest('.btn-buy-now, .shop-inspect-btn, .btn-inspect, a[href^="http"]');
+    // 📌 Tıklama Dinleyicisi (Sadece Belirli Buton ve Dış Linkler İçin)
+    document.addEventListener('click', async (e) => {
+        // Sadece .btn-buy-now, .btn-inspect, .shop-inspect-btn veya target="_blank" olan linkleri yakala
+        const btn = e.target.closest('.btn-buy-now, .shop-inspect-btn, .btn-inspect, a[target="_blank"]');
         
         if (btn) {
-            e.preventDefault();
-            // Link değerini href veya data-link attribute'undan güvenle çekiyoruz
             const destination = btn.getAttribute('href') || btn.dataset.link;
-            if (destination) {
+            // İç gezinmeleri (hash veya boş linkleri) engelleme, sadece harici http/https linklerini yakala
+            if (destination && destination.startsWith('http')) {
+                e.preventDefault();
+                e.stopPropagation();
                 await handleExternalLink(destination);
             }
         }
-    }); //document.body.addEventListener('click', async (e) => {
+    });
 	
 });//window.addEventListener('DOMContentLoaded', async() => {
 
