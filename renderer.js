@@ -392,21 +392,17 @@ window.addEventListener('DOMContentLoaded', async() => {
     const handleExternalLink = async (targetUrl) => {
         if (!targetUrl || targetUrl === '#' || targetUrl.startsWith('javascript:')) return;
 
-        // 1. Tauri v2 Opener Plugin Kontrolü (ReferenceError fırlatmayacak güvenli kontrol)
-    try {
-        if (window.__TAURI_INTERNALS__ && window.__TAURI_INTERNALS__.plugins && window.__TAURI_INTERNALS__.plugins.opener) {
-            await window.__TAURI_INTERNALS__.plugins.opener.openUrl(targetUrl);
-            return;
-        } else if (window.__TAURI__ && window.__TAURI__.opener) {
-            await window.__TAURI__.opener.openUrl(targetUrl);
-            return;
-        } else if (typeof openUrl === 'function') {
-            await openUrl(targetUrl);
-            return;
-        }
-    } catch (err) {
-        console.warn("Tauri openUrl çalışmadı, fallback deneniyor:", err);
-    }
+		if (!targetUrl || targetUrl === '#' || targetUrl.startsWith('javascript:')) return;
+
+		// 1. Tauri v2 Opener Plugin
+		try {
+			if (typeof openUrl === 'function') {
+				await openUrl(targetUrl);
+				return;
+			}
+		} catch (err) {
+			console.warn("Tauri openUrl hatası, fallback deneniyor:", err);
+		}
 
         // 2. Electron Ortamı
         if (window.require) {
