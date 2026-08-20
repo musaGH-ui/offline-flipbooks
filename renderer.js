@@ -61,7 +61,19 @@ const pageRenderLocks = {}; // Mükerrer render isteklerini engelleme kilidi
 const handleExternalLink = async (targetUrl) => {
 	if (!targetUrl || targetUrl === '#' || targetUrl.startsWith('javascript:')) return;
 	
-	// 1. Electron Ortamı
+	// 1. Tauri Ortamı (Doğrudan İşletim Sistemine Tetik Gönderir)
+    if (window.__TAURI_INTERNALS__ || window.__TAURI__) {
+        try {
+            const invoke = window.__TAURI_INTERNALS__?.invoke || window.__TAURI__?.core?.invoke;
+            if (invoke) {
+                invoke('open_in_browser', { url: targetUrl });
+                return;
+            }
+        } catch (err) {
+            console.error("Rust komut hatası:", err);
+        }
+    }
+	// 2. Electron Ortamı
 	if (window.require) {
 		try {
 			const { shell } = window.require('electron');
@@ -73,36 +85,10 @@ const handleExternalLink = async (targetUrl) => {
 			console.warn("Electron shell çağrısı başarısız:", e);
 		}
 	}
-	
-	// 2. Tauri v2 Ortamı (Global Enjeksiyon + Opener Plugin Kontrolü)
-    if (window.__TAURI__ || window.__TAURI_INTERNALS__) {
-        try {
-            // A. Öncelik: Global Tauri Opener Objesi
-            if (window.__TAURI__?.opener?.openUrl) {
-                await window.__TAURI__.opener.openUrl(targetUrl);
-                return;
-            } 
-            // B. Öncelik: NPM Plugin Opener Import'u
-            else if (typeof openUrl === 'function') {
-                await openUrl(targetUrl);
-                return;
-            }
-            // C. Öncelik: Özel Rust Komutu (Invoke) Fallback
-            else {
-                const invoke = window.__TAURI_INTERNALS__?.invoke || window.__TAURI__?.core?.invoke;
-                if (invoke) {
-                    await invoke('plugin:opener|open_url', { path: targetUrl });
-                    return;
-                }
-            }
-        } catch (err) {
-            console.warn("Tauri ile link açılamadı, standart fallback deneniyor:", err);
-        }
-    }
-		
 	// 3. Normal Tarayıcı Fallback (WebView adresini değiştirmeden dış pencereler için)
-	window.open(targetUrl, '_blank', 'noopener,noreferrer');
+	window.open(targetUrl, '_blank');
 }; //const handleExternalLink = async (targetUrl) => {
+	
 async function setResponsiveWindow() {
     try {
         // 1. Tauri ortamında olup olmadığımızı kontrol eden pürüzsüz kalkan
