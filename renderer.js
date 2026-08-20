@@ -32,15 +32,15 @@ function debugLog(step) {
 }
 
 // Global Yakalanamayan Hataları Yakala ve Ekrana Bas
-/*window.addEventListener('error', function(e) {
+window.addEventListener('error', function(e) {
     debugLog("🚨 GLOBAL HATA: " + e.message + " (" + e.filename + ":" + e.lineno + ")");
-});*/
+});
 
-/*window.addEventListener('unhandledrejection', function(e) {
+window.addEventListener('unhandledrejection', function(e) {
     debugLog("🚨 PROMISE HATA: " + (e.reason ? (e.reason.message || JSON.stringify(e.reason)) : e));
-});*/
+});
 
-//debugLog("1. renderer.js yuklendi.");
+debugLog("1. renderer.js yuklendi.");
 
 
 
@@ -60,14 +60,13 @@ const pageRenderLocks = {}; // Mükerrer render isteklerini engelleme kilidi
 async function setResponsiveWindow() {
     try {
         // 1. Tauri ortamında olup olmadığımızı kontrol eden pürüzsüz kalkan
-        if (typeof window === 'undefined' || !window.__TAURI_INTERNALS__) {
-            console.log("Uygulama Tauri dışı bir ortamda (Electron/Tarayıcı) çalışıyor, pencere boyutlandırma atlandı.");
-            return; // Tauri yoksa fonksiyonu güvenle sonlandır, hata fırlatma
-        }
+        if (typeof window === 'undefined') return;
+        // Global Tauri pencere nesnesi yoksa async kilitlenme yaşamamak için derhal çık
+        if (!window.__TAURI_INTERNALS__ && !window.__TAURI__) return;
 
         // 2. Aktif pencere nesnesini çağırıyoruz (Sadece gerçek Tauri ortamında çalışır)
         const appWindow = getCurrentWindow();
-        if (!appWindow) return;
+        if (!appWindow || typeof appWindow.setSize !== 'function') return;
         const screenWidth = window.screen.width;
         const screenHeight = window.screen.height;
 
@@ -394,10 +393,14 @@ window.addEventListener('DOMContentLoaded', async() => {
 		// 1. Tauri Ortamı (Doğrudan İşletim Sistemine Tetik Gönderir)
 		if (window.__TAURI_INTERNALS__ || window.__TAURI__) {
 			try {
-				const invoke = window.__TAURI_INTERNALS__?.invoke || window.__TAURI__?.core?.invoke;
-				if (invoke) {
-					invoke('open_in_browser', { url: targetUrl });
-					return;
+				// 1. Tauri v2 IPC Kontrolü (Güvenli Nesne Zinciri)
+				const invokeFn = window.__TAURI_INTERNALS__?.invoke || 
+								 window.__TAURI__?.core?.invoke || 
+								 window.__TAURI__?.invoke;
+				if (typeof invokeFn === 'function') {
+				invokeFn('open_in_browser', { url: targetUrl })
+					.catch(err => console.warn("Rust invoke hatası:", err));
+				return;
 				}
 			} catch (err) {
 				console.error("Rust komut hatası:", err);
@@ -416,7 +419,7 @@ window.addEventListener('DOMContentLoaded', async() => {
 			}
 		}
 		// 3. Normal Tarayıcı Fallback (WebView adresini değiştirmeden dış pencereler için)
-		window.open(targetUrl, '_blank');
+		window.open(targetUrl, '_blank', 'noopener,noreferrer');
 	}; //const handleExternalLink = async (targetUrl) => {
 
     // 2. Logo Tıklama Dinleyicisi
