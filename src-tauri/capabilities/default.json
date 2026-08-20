@@ -10,7 +10,6 @@
     "core:path:default",
     "core:resources:default",
     "log:default",
-	"opener:default",
-    "opener:allow-open-url"
+	"opener:default"
   ]
 }
