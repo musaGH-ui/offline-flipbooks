@@ -113,7 +113,7 @@ async function setResponsiveWindow() {
 
         // 2. Aktif pencere nesnesini çağırıyoruz (Sadece gerçek Tauri ortamında çalışır)
         const appWindow = getCurrentWindow();
-        
+        if (!appWindow) return;
         const screenWidth = window.screen.width;
         const screenHeight = window.screen.height;
 
@@ -152,13 +152,14 @@ window.addEventListener('DOMContentLoaded', async() => {
 	// DOMContentLoaded içindeki ilk satır:
 	//debugLog("2. DOMContentLoaded tetiklendi.");
 	// 🌟 ÖNCE pencerenin responsive olarak ekrana oturmasını KESİN olarak bekliyoruz
-    try {
+    /*try {
         // Pencerenin oturmasını kesin olarak bekliyoruz (Tek satır olarak)
         await setResponsiveWindow();
     } catch (windowError) {
         console.error("Pencere boyutlandırılırken hata:", windowError);
-    }
-	
+    }*/
+	// 🔑 KİLİT ÇÖZÜCÜ: setResponsiveWindow çağrısı arka plana alındı, PDF yüklenmesini engellemez!
+    setResponsiveWindow().catch(e => console.warn(e));
 	
 	// Uygulama penceresinin üst çerçevesini de günceller
 	document.title = displayTitle;
