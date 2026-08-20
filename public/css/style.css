@@ -2,31 +2,21 @@ html, body {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
     touch-action: manipulation;
-}
-
-body, html {
     margin: 0;
     padding: 0;
     width: 100%;
-    height: 100vh;
-	overflow: hidden !important;
-	display: flex;
-	justify-content: center;
-	align-items: center;
+    height: 100%;
+    overflow: hidden;
     font-family: Arial, sans-serif;
     background-color: #f5f5f5;
-    /* Pencerenin kendisinin dikeyde kaymasını kesin olarak engelliyoruz */
-    scroll-behavior: auto !important;
 }
+
 body {
-	background: url("../images/arka_plan.jpg") no-repeat center center fixed !important;
-	background-size: cover !important;
-	/* İçindeki her şeyi ekranın tam ortasında eşitleyen esnek flex */
-	display: flex !important;
-	justify-content: center !important;
-	align-items: center !important;
-    /* Resim yüklenene kadar veya yüklenemezse görünecek bir yedek renk */
-    background-color: #f4f4f4; 
+    background: #f4f4f4 url("../images/arka_plan.jpg") no-repeat center center fixed !important;
+    background-size: cover !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .app-container {
@@ -63,14 +53,12 @@ body {
 
 /* Flipbook Alanı */
 .main-content {
-    flex: 1 !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     padding: 40px;
-	/* 🌟 KESİN ÇÖZÜM: hidden kuralını kaldırıp auto yapıyoruz. 
-       Böylece içerideki kitap ekranı aşarsa otomatik scroll-bar belirecek! */
-	overflow: auto !important;
+    overflow: auto;
 }
 
 .flipbook {
@@ -78,60 +66,41 @@ body {
     background: #fff;
 }
 
-/* =========================================================================
-   SAYFA KATMANLARI (Büyülü Kısım)
-   ========================================================================= */
+/* SAYFA KATMANLARI */
 .page-container {
-    position: relative; /* İçindeki absolute elemanları hizalamak için */
+    position: relative;
     background-color: white;
     overflow: hidden;
 }
 
-/* 1. Orijinal metin katmanının yapısını bozmadan şeffaflık kısıtlamalarını kaldırıyoruz */
 .textLayer {
-    opacity: 1 !important; /* Görünürlüğü zorla açıyoruz ki arkadaki sarı şeritler kaybolmasın */
-    mix-blend-mode: normal !important ;
-	/*--textLayer-opacity: 1 !important; /* Bazı PDF.js versiyonları CSS değişkeni kullanır */
+    opacity: 1 !important;
+    mix-blend-mode: normal !important;
 }
 
-/* 2. Kapsayıcı span'lerin mizanpaj kilitleri */
 .textLayer span {
     position: absolute !important;
     z-index: 2 !important;
-	background-color: transparent !important;
+    background-color: transparent !important;
     box-shadow: none !important;
-	transition: background-color 0.2s ease; /* Parlamanın pürüzsüz gelmesi için */
+    transition: background-color 0.2s ease;
 }
 
-/* 🌟 ARAMADA EŞLEŞEN KELİMENİN TAM KUTUSUNU ARKA PLANDAN BOYAYAN SIHİRLİ SINIF 
-   HTML'in içine yeni etiket sokmadığımız için punto uyumsuzluğu, taşma veya 
-   sağdaki kelimenin üzerini kapatma riski %0'dır! */
 .textLayer span.pdf-live-search-match {
-    background-color: rgba(255, 217, 0, 0.95) !important; /* Canlı fosforlu neon sarı */
-    color: #000000 !important;                            /* Net siyah harfler */
+    background-color: rgba(255, 217, 0, 0.95) !important;
+    color: #000000 !important;
     border-radius: 3px !important;
     box-shadow: 0 0 4px rgba(255, 217, 0, 0.6) !important;
-	/* Harflerin arkasına geçerek seçilebilirliği ve PDF transform ölçeklerini (scaleX) korur */
     mix-blend-mode: multiply !important;
 }
-/* --- DİNAMİK VE GLOBAL HIGHLIGHT BOYAMA MOTORU --- */
-/* PDF kaç sayfa olursa olsun, bu tek kural tüm dökümana yeter! */
-/* Tarayıcı seviyesinde boyama yaptığı için harf kayması matematiksel olarak imkansızdır! */
-/*::highlight(pdf-global-search) {
-    background-color: rgba(255, 217, 0, 0.95) !important; /* Fosforlu sarı */
-    /*color: #000000 !important;                            /* Net siyah yazı */
-/*}*/
 
-/* --- SEÇİM ANINDA DEVREYE GİREN KRALİYET MAVİSİ KORUMASI --- */
-/* 1. Seçim anında katmanın içindeki tüm elementlerin opaklığını zorla %100 yapıyoruz */
 .textLayer *::selection {
-    background: rgb(0, 102, 255) !important; /* Net, canlı kraliyet mavisi */
+    background: rgb(0, 102, 255) !important;
     background-color: rgb(0, 102, 255) !important;
-    color: #ffffff !important; /* Siyah kalan yazıları ZORLA beyaza çevirir */
-    opacity: 1 !important; /* Solukluğu bitiren en kritik satır */
+    color: #ffffff !important;
+    opacity: 1 !important;
 }
 
-/* Firefox için opaklık ve renk zorlaması */
 .textLayer *::-moz-selection {
     background: rgb(0, 102, 255) !important;
     background-color: rgb(0, 102, 255) !important;
@@ -139,8 +108,6 @@ body {
     opacity: 1 !important;
 }
 
-/* 2. Eğer PDF.js span etiketlerine özel sınıflar atadıysa, 
-   seçim anında onların şeffaflık/opaklık oyunlarını tamamen iptal et */
 .textLayer span::selection {
     color: #ffffff !important;
     background: rgb(0, 102, 255) !important;
@@ -154,41 +121,29 @@ body {
 }
 
 #flipbook-container {
-    /* Sayfa geçişlerinde konumun oynamaması için sabit pozisyon güvencesi */
     position: relative; 
     max-width: 95vw;
     max-height: 85vh;
     width: 100%;
     height: 100%;
-    overflow: hidden !important;
-    
-    /* Boyut değişimlerinde animasyon zıplamalarını yutması için */
-    transition: none !important; 
-    
+    overflow: hidden;
     transform-origin: center center;
-    flex-shrink: 0 !important;
+    flex-shrink: 0;
 }
 
-.page-flip ,
+.page-flip,
 .st-page-flip,
-.st-flipbook
-{
-    max-width: 95vw;  /* Ekran genişliğinin %80'ini geçmesin */
-    max-height: 85vh; /* Ekran yüksekliğinin %85'ini geçmesin */
-	width: 100%;
-	height: 100%;
-	overflow: hidden !important; /* Asla iç kaydırma çubuğu çıkaramaz */
-	/* 🌟 ZOOM İÇİN KRİTİK: scale() ile büyütme yaparken tarayıcının 
-       scroll-bar hesaplarını doğru yapabilmesi için orijini merkeze kilitliyoruz */
+.st-flipbook {
+    max-width: 95vw;
+    max-height: 85vh;
+    width: 100%;
+    height: 100%;
+    overflow: hidden !important;
     transform-origin: center center;
-	/* Esnek mizanpajda ezilmesini kesinlikle önlemek için */
-    flex-shrink: 0 !important;
-	outline: none !important; /* Tarayıcının focus (odaklanma) çerçevesini siler */
-    
+    flex-shrink: 0;
+    outline: none !important;
 }
 
-/* 🌟 KÜTÜPHANENİN İÇ SAYFALARI (Animasyona uğrayan katman) */
-/* Sayfaların boyutunu kütüphane yönetsin, biz sadece zıplama ve odak engellerini koyalım */
 .page {
     outline: none !important; 
     -webkit-backface-visibility: hidden; 
@@ -205,42 +160,34 @@ body {
 
 /* Toolbar Ana Gövdesi */
 .custom-toolbar {
-	font-size: 14px; /* Butonların referans yazı boyutunu sabitleyin */
+    font-size: 14px;
     position: fixed;
-    bottom: 25px; /* Ekranın altında sabit durur */
+    bottom: 25px;
     left: 50% !important;
-	/* 🌟 KESİN ÇÖZÜM: Hem %50 yatay ortalama hem de zarif ölçekleme tek satırda birleştirildi */
     transform: translateX(-50%) scale(0.92) !important;
-	transform-origin: center bottom !important;
-	
+    transform-origin: center bottom !important;
     display: flex !important;
     align-items: center !important;
-	justify-content: center !important;
-	gap: 8px;
-    
-    /* Arka planı daha koyu ve opak yaparak görünürlüğü artırdık */
+    justify-content: center !important;
+    gap: 8px;
     background: rgba(20, 20, 20, 0.9); 
     backdrop-filter: blur(15px); 
     -webkit-backdrop-filter: blur(15px);
-	/* Çerçeveyi kalınlaştırıp belirginleştirdik */
     border: 2px solid rgba(255, 255, 255, 0.2);
     padding: 6px 18px;
-    border-radius: 60px; /* Oval şık tasarım */
-    /* Gölgeyi derinleştirerek flipbook'un üzerinde havada durma efekti verdik */
+    border-radius: 60px;
     box-shadow: 0 12px 50px rgba(0, 0, 0, 0.7);
-    z-index: 99999; /* En üstte kalması için katmanı yükselttik */
+    z-index: 99999;
     transition: all 0.3s ease;
 }
 
-/* Buton Stilleri */
-/* Buton Boyutlarını ve Okunabilirliği Artırma */
 .custom-toolbar button {
-	padding: 0 !important; /* Butonların daire formunu korumak için pading sıfırlandı */
+    padding: 0 !important;
     background: none;
     border: none;
-    color: #f0f0f0; /* Daha parlak bir gri/beyaz tonu */
-    font-size: 16px; /* İkon boyutlarını büyüttük (Eskisi 16px idi) */
-    width: 44px;  /* Tıklama alanını genişlettik (Eskisi 40px) */
+    color: #f0f0f0;
+    font-size: 16px;
+    width: 44px;
     height: 44px;
     border-radius: 50%;
     cursor: pointer;
@@ -250,48 +197,41 @@ body {
     transition: all 0.2s ease;
 }
 
-/* Hover (Üzerine Gelince) Efektini Güçlendirme */
 .custom-toolbar button:hover {
     background: rgba(255, 255, 255, 0.25);
-    color: #00e5ff; /* Daha parlak ve dikkat çekici bir neon mavi */
-    transform: translateY(-5px) scale(1.15); /* Hafif büyütme efekti ekledik */
+    color: #00e5ff;
+    transform: translateY(-5px) scale(1.15);
 }
 
-/* Aktiflik Durumu (Örn: Metin Seçimi Açıkken) */
 .custom-toolbar button.active {
     background: #00e5ff;
     color: #121212;
     box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
 }
 
-/* Devre Dışı (Disabled) Butonlar - Örn: İlk sayfada geri butonu */
 .custom-toolbar button:disabled {
     color: rgba(255, 255, 255, 0.15) !important;
     cursor: not-allowed;
     transform: none !important;
     background: none !important;
 }
-/* Ayırıcı Çizgiyi Belirginleştirme */
+
 .toolbar-divider {
-    width: 2px; /* Kalınlaştırdık */
+    width: 2px;
     height: 35px;
     background: rgba(255, 255, 255, 0.2);
     margin: 0 10px;
 }
 
-/* Sayfa Sayacını Büyütme */
 .page-counter {
     color: #ffffff;
     font-family: 'Segoe UI', Roboto, sans-serif;
-    font-size: 20px; /* Yazı boyutunu büyüttük */
-    font-weight: 600; /* Kalınlaştırdık */
+    font-size: 20px;
+    font-weight: 600;
     padding: 0 10px;
     user-select: none;
-    white-space: nowrap; /* Sayıların alt alta kırılmasını önler */
+    white-space: nowrap;
 }
-
-/* PDF içindeki tıklanabilir linklerin katman ayarları */
-/* --- Annotation Layer Mutlak Konumlandırma ve Görünürlük --- */
 
 .annotationLayer {
     position: absolute !important;
@@ -299,12 +239,11 @@ body {
     left: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    z-index: 50 !important; /* Canvas'ın ve textLayer'ın kesinlikle üstünde olmalı */
-    pointer-events: auto !important; /* Tıklamaları serbest bırakır */
+    z-index: 50 !important;
+    pointer-events: auto !important;
     transform-origin: top left;
 }
 
-/* PDF.js'in ürettiği her bir link kutusunun altındaki 'a' etiketini genişletiyoruz */
 .annotationLayer .linkAnnotation {
     position: absolute !important;
     z-index: 51 !important;
@@ -318,7 +257,7 @@ body {
     top: 0 !important;
     left: 0 !important;
     cursor: pointer !important;
-    background-color: rgba(0, 229, 255, 0.0) !important; /* Link alanları tamamen şeffaf */
+    background-color: rgba(0, 229, 255, 0.0) !important;
     border-bottom: 1px dashed rgba(0, 229, 255, 0.0) !important;
 }
 
@@ -326,126 +265,108 @@ body {
     background-color: rgba(0, 229, 255, 0.15) !important;
 }
 
-
-
 #bookmarks-list-wrapper {
-    flex: 1 !important;
-    overflow-y: auto !important;
+    flex: 1;
+    overflow-y: auto;
 }
 
 #bookmarks-list {
-    list-style: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 10px !important;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-/* Yer İşareti Satır Tasarımı */
 #bookmarks-list li {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border-left: 5px solid #00e5ff !important; /* Modern neon mavi şerit */
-    padding: 12px 15px !important;
-    border-radius: 0 8px 8px 0 !important;
-    cursor: pointer !important;
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    transition: all 0.2s ease !important;
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 5px solid #00e5ff;
+    padding: 12px 15px;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
 }
 
 #bookmarks-list li:hover {
-    background: rgba(0, 229, 255, 0.1) !important;
+    background: rgba(0, 229, 255, 0.1);
     transform: translateX(4px);
 }
 
 .bookmark-text {
-    font-size: 15px !important;
-    font-weight: 600 !important;
-    color: #f0f0f0 !important;
+    font-size: 15px;
+    font-weight: 600;
+    color: #f0f0f0;
 }
 
-/* Yer İşareti Silme Butonu (Çöp Kutusu) */
 .btn-delete-bookmark {
-    background: none !important;
-    border: none !important;
-    color: rgba(255, 255, 255, 0.4) !important;
-    cursor: pointer !important;
-    font-size: 16px !important;
-    padding: 5px !important;
-    transition: color 0.2s ease !important;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 5px;
+    transition: color 0.2s ease;
 }
 
 .btn-delete-bookmark:hover {
-    color: #ff3333 !important; /* Üzerine gelince kırmızı olur */
+    color: #ff3333;
 }
 
-/* =========================================================================
-   SOL BUTON PANELİ VE YAN PANELLER (DİKEY YAZI DÜZENİ)
-   ========================================================================= */
-   /* 1. Buton Kapsayıcısı: Pencerenin en üst-sol köşesine kilitli dikey dizilim */
+/* SOL PANEL BUTTONLARI */
 .panel-trigger-buttons {
     position: fixed !important;
     left: 10px !important;
     top: 10px !important;
-    z-index: 999999 !important; /* Panellerin de üstünde kalsınlar */
+    z-index: 999999 !important;
     display: flex !important;
-    flex-direction: column !important; /* Üst üste dursunlar */
+    flex-direction: column !important;
     gap: 8px !important;
-	pointer-events: auto !important; /* Tıklamaların flipbook arkasında kalsa bile buton tarafından yakalanmasını sağlar */
-	/* 🌟 SAYFALARIN ALTINA GİRMESİNİ SAĞLAYAN SİHİRLİ DUVAR KURALLARI 🌟 */
-    background: rgba(20, 20, 20, 0.95) !important; /* Altındaki sayfayı tamamen kapatacak koyu arka plan */
-    backdrop-filter: blur(15px) !important;        /* Sayfa arkadan geçerken buzlu cam efekti verir */
-    padding: 8px !important;                      /* Butonların etrafında güvenli siyah bir alan oluşturur */
-    border-radius: 12px !important;                /* Köşeleri panellerle uyumlu hale getirir */
-    border: 1px solid rgba(255, 255, 255, 0.1) !important; /* İnce şık bir çerçeve */
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;  /* Sayfanın üstünde havada durduğu hissini pekiştirir */
-	/* Dikey metinler için ideal panel genişliği */
-    width: 58px !important;                       /* 200px buton + 2x15px padding = Tam butonları saran genişlik */
+    pointer-events: auto !important;
+    background: rgba(20, 20, 20, 0.95) !important;
+    backdrop-filter: blur(15px) !important;
+    padding: 8px !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    width: 58px !important;
     box-sizing: border-box !important;
 }
 
-/* =========================================================================
-   2. Tüm Sol Panel Butonlarının Görsel Sıfırlanması ve Eşitlenmesi
-   ========================================================================= */
-   .panel-trigger-buttons button,
+.panel-trigger-buttons button,
 .panel-trigger-buttons .panel-header-btn,
 button#btn-toggle-thumbnails,
 button#btn-toggle-search,
 button#btn-toggle-bookmarks,
 button#btn-toggle-shop {
     display: flex !important;
-    flex-direction: column !important; /* İkon üstte, yazı altta şık durması için */
+    flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
     gap: 8px !important;
-    
     width: 100% !important;
-	min-width: 0 !important;             /* Eski min-width: 110px çakışmasını tamamen ezer */
-	max-width: 100% !important;
-    height: 110px !important;  /* Dikey yazının rahat sığması için yükseklik artırıldı */     
-    padding: 8px 0 !important;    
-    
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: 110px !important;
+    padding: 8px 0 !important;
     font-family: 'Segoe UI', system-ui, sans-serif !important;
-    font-size: 11px !important;     /* Alt yazılar için daha minimal, kibar punto */
-    font-weight: 700 !important;   
+    font-size: 11px !important;
+    font-weight: 700 !important;
     text-transform: uppercase !important;
     color: rgba(255, 255, 255, 0.7) !important;
     letter-spacing: 1px !important;
-        
     background: rgba(255, 255, 255, 0.05) !important;
-	background-color: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(0, 229, 255, 0.2) !important; 
+    border: 1px solid rgba(0, 229, 255, 0.2) !important;
     border-radius: 8px !important;
-	
     cursor: pointer !important;
     transition: all 0.2s ease-in-out !important;
-	box-sizing: border-box !important;
-	outline: none !important;
+    box-sizing: border-box !important;
+    outline: none !important;
 }
 
-/* 3. İkonların Sabitliği (Dönmelerini Önler) */
 .panel-trigger-buttons button i,
 .panel-trigger-buttons .panel-header-btn i {
     font-size: 18px !important;
@@ -458,13 +379,11 @@ button#btn-toggle-shop {
     flex-shrink: 0 !important;
 }
 
-/* 4. Başlıkların Dikey ve Aşağıdan Yukarıya Doğru Yazılması */
 .panel-trigger-buttons button span,
 .panel-trigger-buttons .panel-header-btn span {
     writing-mode: vertical-rl !important;
-    transform: rotate(180deg) !important; /* Metni aşağıdan yukarı okutur */
+    transform: rotate(180deg) !important;
     white-space: nowrap !important;
-    
     font-family: 'Segoe UI', system-ui, sans-serif !important;
     font-size: 11px !important;
     font-weight: 700 !important;
@@ -475,18 +394,14 @@ button#btn-toggle-shop {
     display: block !important;
 }
 
-/* 5. Hover ve Aktiflik Efektleri */
 button#btn-toggle-thumbnails:hover,
 button#btn-toggle-search:hover,
 button#btn-toggle-bookmarks:hover,
 button#btn-toggle-shop:hover,
 .panel-trigger-buttons button:hover {
     background: rgba(0, 229, 255, 0.2) !important;
-	background-color: rgba(0, 229, 255, 0.2) !important;
-	border: 1px solid #00e5ff !important;
-    border-color: #00e5ff !important;
-	box-shadow: 0 0 12px rgba(0, 229, 255, 0.3) !important;
-    transform: translateX(2px) !important; /* Üzerine gelince hafifçe yukarı zıplama efekti */
+    border: 1px solid #00e5ff !important;
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.3) !important;
 }
 
 button#btn-toggle-thumbnails.active,
@@ -495,12 +410,10 @@ button#btn-toggle-bookmarks.active,
 button#btn-toggle-shop.active,
 .panel-trigger-buttons button.active {
     background: #00e5ff !important;
-	background-color: #00e5ff !important;
-	border: 1px solid #00e5ff !important;
-    border-color: #00e5ff !important;
+    border: 1px solid #00e5ff !important;
     box-shadow: 0 0 15px rgba(0, 229, 255, 0.5) !important;
 }
-/* Aktif butonun içindeki hem ikon hem de yazıyı SIYAH yapma garantisi */
+
 button#btn-toggle-thumbnails.active i,
 button#btn-toggle-thumbnails.active span,
 button#btn-toggle-search.active i,
@@ -514,54 +427,45 @@ button#btn-toggle-shop.active span,
     color: #000000 !important;
 }
 
-/* 6. Eski CSS Dosyalarındaki Yatay Buton Genişlik Basmalarını Temizleme */
 #btn-toggle-thumbnails, .toolbar-btn {
     min-width: 0 !important;
     width: 100% !important;
     height: 110px !important;
 }
-/* =========================================================================
-   3. Yan Panellerin Dikey Buton Grubunun Sağına Konumlanması 
-   ========================================================================= */
-   #sidebar-container, 
+
+/* YAN PANELLER */
+#sidebar-container, 
 #search-sidebar-container, 
 #bookmarks-sidebar-container,
 #shop-sidebar-container {
     position: fixed !important;
-    left: 78px !important; /* 58px buton paneli + 10px sol boşluk + 10px ara boşluk */
+    left: 78px !important;
     top: 10px !important;
     bottom: 20px !important;
-    
-        
-    /* Eski 280px genişliği %50 artırarak 420px yaptık. İnanılmaz ferah bir alan! */
     width: 380px !important;
-	max-width: calc(100vw - 90px) !important;	
+    max-width: calc(100vw - 90px) !important;    
     box-sizing: border-box !important;
     z-index: 99990 !important;
-
     background: rgba(20, 20, 20, 0.95) !important;
     backdrop-filter: blur(15px) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: 12px !important;
-	
     padding: 30px 24px 24px 24px !important;
     color: #ffffff !important;
     font-family: 'Segoe UI', sans-serif !important;
-
     display: flex; 
     flex-direction: column !important;
     gap: 18px !important;
     overflow: hidden !important;
-    /* Açılıp kapanırken sola pürüzsüz kayma animasyonu */
-    transition: transform 0.3s ease, opacity 0.3s ease !important;
 }
 
+/* 🌟 KİLİTLENMEYİ ÖNLEYEN DÜZELTİLMİŞ KAPANMA SINIFI */
 .sidebar-hidden {
-	display: none !important; /* Hayalet panel blokajını kökten çözen satır */
-    transform: translateX(-480px) !important;
+    display: none !important;
     opacity: 0 !important;
     pointer-events: none !important;
 }
+
 #sidebar-container h3, 
 #search-sidebar-container h3,
 #bookmarks-sidebar-container h3,
@@ -570,14 +474,13 @@ button#btn-toggle-shop.active span,
     margin-bottom: 10px !important;
     font-size: 20px !important;
     font-weight: 700 !important;
-	text-align: center !important; /* Başlığı tam ortalar */
+    text-align: center !important;
     border-bottom: 2px solid rgba(0, 229, 255, 0.6) !important;
     padding-bottom: 12px !important;
     color: #00e5ff !important;
-	width: 100% !important;
+    width: 100% !important;
 }
 
-/* Arama sonuçlarının panel dışına taşmasını veya paneli büyütmesini engeller */
 #search-results-container {
     background: rgba(0, 0, 0, 0.3) !important;
     border-radius: 10px !important;
@@ -587,7 +490,7 @@ button#btn-toggle-shop.active span,
     flex: 1 !important;
     display: flex !important;
     flex-direction: column !important;
-    overflow: hidden !important; /* Sağa genişlemeyi kilitler */
+    overflow: hidden !important;
     width: 100% !important;
     box-sizing: border-box !important;
 }
@@ -600,10 +503,10 @@ button#btn-toggle-shop.active span,
     flex-direction: column !important;
     gap: 12px !important;
     flex: 1 !important;
-    overflow-y: auto !important; /* Sonuçlar sadece kendi içinde dikey kayar */
+    overflow-y: auto !important;
     padding-right: 5px !important;
 }
-/* Küçük Resimlerin Listelendiği Dikey Kaydırma Alanı */
+
 #thumbnails-list {
     flex: 1;
     overflow-y: auto;
@@ -614,7 +517,6 @@ button#btn-toggle-shop.active span,
     align-items: center;
 }
 
-/* Her Bir Küçük Resim Kutusu */
 .thumbnail-item {
     cursor: pointer;
     position: relative;
@@ -626,8 +528,7 @@ button#btn-toggle-shop.active span,
     display: flex;
     flex-direction: column;
     align-items: center;
-	justify-content: center;
-	/* Dikey yığılmayı ve ezilmeyi önleyen hayati kurallar */
+    justify-content: center;
     flex-shrink: 0 !important; 
     flex-grow: 0 !important;
     margin-bottom: 12px;
@@ -637,23 +538,16 @@ button#btn-toggle-shop.active span,
     display: block !important;
     max-width: none !important; 
     max-height: none !important;
-    /* Yüksekliğin ezilerek 0px veya yatay çizgi olmasını engeller */
     min-height: auto !important; 
     flex-shrink: 0 !important;
     opacity: 0.8;
     transition: opacity 0.2s ease;
 }
 
-/* Hover ve Aktif Sayfa Efektleri */
 .thumbnail-item:hover canvas {
     opacity: 1;
 }
 
-.thumbnail-item:hover {
-    transform: scale(1.03);
-}
-
-/* O an açık olan sayfanın küçük resmini vurgula */
 .thumbnail-item.active-thumbnail {
     border-color: #00e5ff !important;
     box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
@@ -663,104 +557,27 @@ button#btn-toggle-shop.active span,
     opacity: 1;
 }
 
-/* Sayfa Numarası Etiketi */
 .thumbnail-page-number {
     position: absolute !important;
     bottom: 8px !important;
     right: 8px !important;
     background: rgba(0, 0, 0, 0.85) !important;
-	border: 1px solid rgba(255, 255, 255, 0.2) !important; /* İnce beyaz çerçeve ile sınırları netleştirme */
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
     color: #ffffff !important;
     border-radius: 6px !important;
-	/* YENİ BÜYÜTÜLMÜŞ BOYUTLAR */
     font-family: 'Segoe UI', system-ui, sans-serif !important;
-    font-size: 14px !important;      /* Puntoyu 10px'den 14px'e çıkardık */
-    font-weight: 700 !important;     /* Yazıyı tam kalın yaptık */
-    padding: 4px 10px !important;    /* Baloncuğun iç alanını genişlettik (Üst-Alt / Sağ-Sol) */
-    /* Metnin ezilmesini veya taşmasını önler */
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    padding: 4px 10px !important;
     line-height: 1 !important;
     white-space: nowrap !important;
     z-index: 10 !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) !important; /* Hafif gölge ile derinlik katıyoruz */
-}
-
-/* --- Sayfalar Butonu ve Genel Toolbar Buton Revizyonu --- */
-
-#btn-toggle-thumbnails, .toolbar-btn {
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-    gap: 8px; /* İkon ile "Sayfalar" yazısı arasındaki boşluk */
-    /* Boyutlandırma - Kesinlikle ezilmemesi için kilitliyoruz */
-    padding: 10px 16px !important;
-    min-width: 110px !important;
-    height: 40px !important;
-    /* Yazı Tipi ve Boyutu - Okunabilir ve net punto */
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.5px;
-    line-height: 1 !important;
-    color: #ffffff !important;
-    /* Arka Plan ve Kenarlık Yapısı */
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-radius: 8px !important;
-    /* Geçiş ve Efektler */
-    cursor: pointer !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    box-sizing: border-box !important;
-    /* Toolbar içinde flexbox varsa butonun büzüşmesini önler */
-    flex-shrink: 0 !important; 
-}
-
-/* Butonun İçindeki İkonun Boyutu */
-#btn-toggle-thumbnails i, .toolbar-btn i {
-    font-size: 16px !important;
-    color: #00e5ff; /* İkonu belirgin modern neon mavi yapıyoruz */
-}
-
-/* Hover (Fareyle Üzerine Gelindiğinde) Efekti */
-#btn-toggle-thumbnails:hover, .toolbar-btn:hover {
-    background: rgba(0, 229, 255, 0.1) !important;
-    border-color: rgba(0, 229, 255, 0.4) !important;
-    box-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
-    color: #00e5ff !important;
-}
-
-/* Active / Panel Açık Olduğunda Butonun Durumu */
-#btn-toggle-thumbnails.active, .toolbar-btn.active {
-    background: #00e5ff !important;
-    border-color: #00e5ff !important;
-    color: #000000 !important; /* Arka plan mavi olunca yazı siyah olsun ki net okunsun */
-    box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
-}
-
-#btn-toggle-thumbnails.active i, .toolbar-btn.active i {
-    color: #000000 !important; /* Aktifken ikon da siyah olsun */
-}
-
-
-/* --- Terim Arama Arayüzü ve Büyük Puntolar --- */
-/* --- ARAMA PANELİ İÇ DEĞİŞİKLİKLERİ --- */
-/* Sonuç Kapsayıcısı: Dikeyde kalan TÜM boşluğu doldurmaya zorluyoruz */
-#search-results-container {
-    background: rgba(0, 0, 0, 0.4) !important;
-	border-radius: 10px !important;
-	padding: 15px !important;
-	border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    margin-top: 15px !important;
-	/* 🌟 SABİT 350PX YÜKSEKLİĞİ KALDIRIP DIKEY TAM BOY YAPIYORUZ 🌟 */
-    max-height: none !important;  /* Eski 350px sınırını çöpe attık */
-    flex: 1 !important;            /* Panelin içindeki tüm boşluğu aşağı doğru kaplar */
-    display: flex !important;
-    flex-direction: column !important;
-    overflow: hidden !important;   /* Dış kutunun taşmasını engeller */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) !important;
 }
 
 .search-input-wrapper {
     display: flex;
-	flex-direction: column; /* Yan yana yerine alt alta sıralar */
+    flex-direction: column;
     gap: 10px;
     margin-bottom: 15px;
 }
@@ -768,12 +585,11 @@ button#btn-toggle-shop.active span,
 #txt-search-term {
     flex: 1;
     height: 48px;
-	min-height: 48px !important;
+    min-height: 48px !important;
     max-height: 48px !important;
-	/* Yazı hizalama ve kutu modeli kilitleri */
-	box-sizing: border-box !important; /* Border ve padding'lerin yüksekliği ezmesini engeller */
-	line-height: 24px !important;  /* Yazının dikeyde tam ortalanmasını sağlar */
-	padding: 10px 15px !important; /* İç boşluğu el ile yukarı ve aşağıya eşit dağıtıyoruz */
+    box-sizing: border-box !important;
+    line-height: 24px !important;
+    padding: 10px 15px !important;
     background: rgba(255, 255, 255, 0.05) !important;
     border: 2px solid rgba(255, 255, 255, 0.2) !important;
     border-radius: 8px !important;
@@ -789,7 +605,7 @@ button#btn-toggle-shop.active span,
 }
 
 #btn-do-search {
-	width: 100% !important; /* Butonun panel genişliğini tam kaplamasını sağlar */
+    width: 100% !important;
     height: 48px;
     padding: 0 20px;
     background: #00e5ff;
@@ -802,65 +618,24 @@ button#btn-toggle-shop.active span,
     transition: all 0.2s;
 }
 
-#btn-do-search:hover {
-    box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
-    transform: scale(1.02);
-}
-
-#search-results-container h4 {
-    margin: 0 0 12px 0;
-    font-size: 18px !important; /* Büyük ve net başlık */
-    color: #00e5ff;
-    font-weight: 700;
-}
-
-/* 5-6 Kelimelik Öbeklerin Listesi */
-#search-results-list {
-	list-style: none !important;
-	padding: 0 !important;
-	margin: 0 !important;
-	display: flex !important;
-	flex-direction: column !important;
-	gap: 14px !important; /* Satırlar arası boşluk */
-	/* 🌟 LİSTE KUTUNUN İÇİNDE DİNAMİK OLARAK KAYACAK 🌟 */
-    flex: 1 !important;
-    overflow-y: auto !important;   /* Sonuçlar çoksa sadece bu liste scroll olur */
-    padding-right: 5px !important; /* Scroll bar yazıya yapışmasın */
-}
-
-/* --- BÜYÜTÜLMÜŞ SNIPPET (SONUÇ) PUNTOLARI --- */
 #search-results-list li {
     background: rgba(255, 255, 255, 0.06) !important;
-    border-left: 5px solid #ffaa00 !important; /* Kalın turuncu şerit */
+    border-left: 5px solid #ffaa00 !important;
     padding: 14px 18px !important;
     border-radius: 0 8px 8px 0 !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
 }
 
-#search-results-list li:hover {
-    background: rgba(255, 255, 255, 0.12);
-    transform: translateX(4px);
-}
-
-/* Öbek İçindeki Yazıların Okunabilirliği */
 .search-snippet {
     display: block !important;
-    font-size: 18px !important;      /* PUNTOYU BÜYÜTTÜK: Çok daha okunaklı */
-    line-height: 1.6 !important;     /* Satır arası ferahlık */
+    font-size: 18px !important;
+    line-height: 1.6 !important;
     color: #f0f0f0 !important;
     font-family: 'Segoe UI', sans-serif !important;
 }
 
-/* Öbek içinde aranan kelimenin kendisini de kalınlaştırıp parlatıyoruz */
-.search-snippet mark {
-    background: #ffaa00 !important;
-    color: #000000 !important;
-    font-weight: 700 !important;
-    padding: 2px 4px !important;
-    border-radius: 4px !important;
-}
-/* Arama listesindeki snippet kelime parlaması */
+.search-snippet mark,
 .search-snippet mark.search-highlight-mark {
     background: #ffaa00 !important;
     color: #000000 !important;
@@ -868,8 +643,9 @@ button#btn-toggle-shop.active span,
     padding: 2px 4px !important;
     border-radius: 4px !important;
 }
+
 .search-page-badge {
-   display: inline-block !important;
+    display: inline-block !important;
     margin-top: 8px !important;
     font-size: 13px !important;
     font-weight: 700 !important;
@@ -879,13 +655,7 @@ button#btn-toggle-shop.active span,
     border-radius: 5px !important;
 }
 
-#thumbnails-list *, #search-results-list * {
-    box-sizing: border-box !important;
-}
-
-/* =========================================================================
-   PDF YÜKLENİYOR ANİMASYON EKRANI
-   ========================================================================= */
+/* YÜKLEME EKRANI */
 #pdf-loading-screen {
     position: fixed !important;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -896,28 +666,24 @@ button#btn-toggle-shop.active span,
     justify-content: center;
     align-items: center;
     gap: 20px;
-    z-index: 9999999 !important; /* Her şeyin en üstünde başlasın */
-    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+    z-index: 9999999 !important;
 }
 
-/* Dönen Neon Halka */
 .pdf-loader-spinner {
     width: 60px;
     height: 60px;
     border: 4px solid rgba(255, 255, 255, 0.1);
-    border-top-color: #00e5ff; /* Arayüzün modern neon mavisi */
+    border-top-color: #00e5ff;
     border-radius: 50%;
     animation: spinLoader 1s linear infinite;
     box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
 }
 
-/* Yükleniyor Yazısı */
 #pdf-loading-text {
     color: #ffffff;
     font-family: 'Segoe UI', sans-serif;
     font-size: 18px;
     font-weight: 600;
-    letter-spacing: 0.5px;
 }
 
 @keyframes spinLoader {
@@ -925,122 +691,58 @@ button#btn-toggle-shop.active span,
     100% { transform: rotate(360deg); }
 }
 
-/* 🌟 KİTAP İLK BAŞTA GİZLİ KALSIN */
+/* 🌟 DÜZELTİLMİŞ KİTAP KAPSAYICISI (Görünürlük kilitlendi) */
 #flipbook-container {
-    opacity: 0; /* İlk başta tamamen gizli */
-	/* İlk başta şık bir büyüme efektiyle gelmesi için ilk ölçeği buraya yazıyoruz */
-    transform: scale(0.95);
-	transform-origin: center center;
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-}
-
-/* Kitap hazır olduğunda JavaScript bu sınıfı ekleyecek */
-#flipbook-container.flipbook-ready {
     opacity: 1 !important;
-    /*transform: scale(1) !important;*/
-	/* 🌟 KESİN ÇÖZÜM: !important kuralını scale(1) üzerinden kaldırıp 
-       sadece transform özelliğinin kendisini (aktifliğini) zorunlu kılıyoruz. 
-       Böylece ilk animasyon bittikten sonra JavaScript zoom motoru 
-       bu ölçeği dilediği gibi büyütebilecek! */
     transform: none;
 }
 
-/* =========================================================================
-   SAĞ ÜST LOGO VE BAŞLIK TASARIMI
-   ========================================================================= */
+/* SAĞ ÜST LOGO VE MAĞAZA */
 .brand-header-container {
     position: fixed !important;
-    right: 20px !important; /* Sol buton paneli ile aynı hizada simetri için */
-    top: 20px !important;   /* Sol buton paneli ile aynı üst hizada */
-    z-index: 999999 !important; /* Butonlarla aynı öncelikte */
-    
+    right: 20px !important;
+    top: 20px !important;
+    z-index: 999999 !important;
     display: flex !important;
     align-items: center !important;
     gap: 30px !important;
-    pointer-events: none !important; /* Kitaba tıklamaya engel olmaması için */
-    
-    /* Hafif koyu şeffaf arka plan ve lüks buzlu cam efekti */
+    pointer-events: none !important;
     background: transparent !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    padding: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
 }
 
-/* Logo Kutusu */
 .brand-logo-wrapper {
     width: 192px !important;
     height: 320px !important;
-	/* 🌟 MUTLAK KONUMLANDIRMA İÇİN ZEMİN HAZIRLIĞI: 
-       İçindeki resmin absolute olarak kendini ortalayabilmesi için 
-       kapsayıcıyı relative yapıyoruz. */
-	position: relative !important;
-    display: block !important; /* Tarayıcının satır boşluğu vermesini engeller */
-	
-	/* 🌟 DEĞİŞİKLİK: Arka planı pürüzsüz ve pırıl pırıl parlayan neon mavisi yaptık! */
-	background: rgba(0, 229, 255, 0.5) !important;
-	/* Çerçeveyi de neon rengiyle tam uyumlu hale getiriyoruz */
-	border: 4px solid rgba(0, 229, 255, 0.6) !important;
+    position: relative !important;
+    display: block !important;
+    background: rgba(0, 229, 255, 0.5) !important;
+    border: 4px solid rgba(0, 229, 255, 0.6) !important;
     border-radius: 24px !important;
     overflow: hidden !important;
-	box-shadow: none !important;
-	
-	pointer-events: auto !important; 
+    pointer-events: auto !important;
     cursor: pointer !important;
-	text-decoration: none !important;
-	transition: all 0.2s ease-in-out !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease-in-out !important;
     box-sizing: border-box !important;
 }
 
-/* Logonun üzerine gelindiğinde neon halkanın parlamasını artıralım */
-.brand-logo-wrapper:hover {
-    /* 🌟 Üzerine gelindiğinde çerçeve beyazlaşır ve arka plan daha dolgun (%80 opak) hale gelir */
-    border-color: rgba(255, 255, 255, 0.9) !important;
-	background: rgba(0, 229, 255, 0.8) !important;
-	transform: scale(1.04); /* Çok hafif büyüme efekti */
-    box-shadow: 0 0 35px rgba(0, 229, 255, 0.6) !important; /* Harika bir neon aura parlaması */
-    
-}
 .brand-logo-wrapper img {
     width: auto !important;
     height: 308px !important;
-	/* 🌟 MATEMATİKSEL MUTLAK ORTALAMA:
-       Resmi kapsayıcının tam ortasına (X: %50, Y: %50) yerleştirip, 
-       kendi boyutunun yarısı kadar geri çekiyoruz. Kayma ihtimali %0'dır! */
-	position: absolute !important;
+    position: absolute !important;
     top: 50% !important;
     left: 50% !important;
-	transform: translate(-50%, -50%) !important;
-	
-	display: block !important;
-    margin: 0 !important; /* Sağa/sola kaymayı engelleyen mutlak kilit */
-	padding: 0 !important;
-	/* Logo oranını bozmadan kutunun dikey sınırlarına kadar büyümesini zorlar */
-    object-fit: contain !important; /* Logonun ezilmesini önler */
-	border: none !important;  /* Tarayıcının otomatik ekleyebileceği kenarlıkları ezer */
+    transform: translate(-50%, -50%) !important;
+    display: block !important;
+    object-fit: contain !important;
 }
 
-/* Logo resmi yüklenemezse devreye girecek şık yedek ikon kutusu */
-.logo-fallback {
-    width: 100% !important;
-    height: 100% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 20px !important;
-    color: #00e5ff !important;
-}
-
-/* =========================================================================
-   MAĞAZA PANELİ İÇ TASARIM AYARLARI
-   ========================================================================= */
 #shop-list-wrapper {
     flex: 1 !important;
     overflow-y: auto !important;
-	overflow-x: hidden !important; /* Yatay taşmayı kesin olarak engeller */
+    overflow-x: hidden !important;
     padding-right: 5px !important;
-	width: 100% !important;
+    width: 100% !important;
     box-sizing: border-box !important;
 }
 
@@ -1049,224 +751,152 @@ button#btn-toggle-shop.active span,
     padding: 10px 5px !important;
     margin: 0 !important;
     display: flex !important;
-	flex-direction: column !important; /* Tüm kartları kesin olarak alt alta dizer */
-	align-items: center !important;    /* Kartları dikey eksende kusursuz ortalar */
-    gap: 24px !important; /* Kartların arasındaki nefes alma boşluğu */
-	box-sizing: border-box !important;
-	width: 100% !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 24px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
 }
 
-/* Her Bir Ürün Kartı */
 .shop-item {
-	display: flex !important;
-	flex-direction: column !important; /* Bileşenleri yukarıdan aşağıya dizer */
-	width: 100% !important;
-    max-width: 100% !important; /* Panel içinde aşırı yayılmasını önleyen koruma */
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
     background: rgba(255, 255, 255, 0.03) !important;
     border: 1px solid rgba(0, 229, 255, 0.15) !important;
     border-radius: 16px !important;
     padding: 16px !important;
     box-sizing: border-box !important;
     transition: transform 0.2s ease, border-color 0.2s ease !important;
-	overflow: hidden !important; /* İç elemanların sağ kenarın altına girmesini engeller */
+    overflow: hidden !important;
 }
 
-.shop-item:hover {
-    border-color: rgba(0, 229, 255, 0.6) !important;
-    transform: translateY(-4px) !important; /* Hafif yukarı zıplama efekti */
-	
-}
-
-/* Ürün Kapak Resmi (3D Kitap Hissi) */
 .shop-item-cover {
-	/* Görselin panel içinde orijinal en-boy oranını (7:10) koruyarak 
-       maksimum netlikte durması için genişliği ve yüksekliği kilitliyoruz */
-    width: 100% !important;        /* Sabit 280px yerine kartın içine tam oturmasını sağlar */
-    max-width: 260px !important;    /* Çok büyük ekranlarda aşırı devasa olmasını önler */
-	height: auto !important;        /* Orijinal en-boy oranını korur */
-	aspect-ratio: 7 / 10 !important;/* Kitap kapağı oranını sabit tutar */
-	
-	display: block !important;
-	margin: 0 auto 16px auto !important; /* Kartın içinde yatayda tam ortalar ve alta boşluk bırakır */
-    object-fit: cover !important; 
+    width: 100% !important;
+    max-width: 240px !important;
+    height: 340px !important; /* aspect-ratio yerine sabit güvenli yükseklik */
+    display: block !important;
+    margin: 0 auto 16px auto !important;
+    object-fit: cover !important;
     border-radius: 10px !important;
-	background: rgba(0, 0, 0, 0.4) !important; /* Kapak kenarlarına harika bir derinlik gölgesi */
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important; /* Kitap hissi veren gerçekçi gölge */
-	box-sizing: border-box !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+    box-sizing: border-box !important;
 }
 
-/* Ürün Detay Alanı */
 .shop-item-details {
     display: flex !important;
     flex-direction: column !important;
-	gap: 12px !important;
-	width: 100% !important;
+    gap: 12px !important;
+    width: 100% !important;
 }
 
-/* 🌟 KESİLMEYEN UZUN ESER İSMİ */
 .shop-item-title {
-	font-family: 'Segoe UI', system-ui, sans-serif !important;
+    font-family: 'Segoe UI', system-ui, sans-serif !important;
     font-size: 15px !important;
     font-weight: 600 !important;
     color: #ffffff !important;
-	line-height: 1.5 !important;
-	text-align: center !important;   /* Görselin altında çok daha estetik durması için ortaladık */
-	/* Üç noktayı kaldıran ve alt satıra pürüzsüz taşmasını sağlayan mutlak kilit */
-    white-space: normal !important;   
-    text-overflow: clip !important;   
-    overflow: visible !important;     
-    word-break: break-word !important; /* Çok uzun kelimeleri de güvenle böler */
-    
-    
+    line-height: 1.5 !important;
+    text-align: center !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+    overflow: visible !important;
+    word-break: break-word !important;
 }
 
-.shop-item-price {
-    font-size: 15px !important;
-    font-weight: 800 !important;
-    color: #00e5ff !important; /* Canlı neon mavi fiyat */
-}
-
-/* WooCommerce Satın Alma / İnceleme Butonu */
 .btn-buy-now {
     display: block !important;
-	text-align: center !important;
-	background: #00e5ff !important;
-	color: #000000 !important;
-	font-weight: 700 !important;
-	font-size: 13px !important;
-	text-transform: uppercase !important;
-	text-decoration: none !important;
-	padding: 12px 0 !important;
-	border-radius: 8px !important;
-	transition: all 0.2s ease !important;
-	letter-spacing: 0.5px !important;
+    text-align: center !important;
+    background: #00e5ff !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    text-transform: uppercase !important;
+    text-decoration: none !important;
+    padding: 12px 0 !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+    letter-spacing: 0.5px !important;
 }
 
-.btn-buy-now:hover {
-    background: #ffffff !important;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4) !important;
-}
-
-/* Flipbook üstündeki dinamik kitap başlığı stili */
-.flipbook-header-title {
-  text-align: center;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin: 12px 0 8px 0;
-  padding: 0 15px;
-  letter-spacing: 0.5px;
-  /* Çok uzun kitap adlarında ekranı bozmaması için sınırlandırma: */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* İsteğe bağlı: Tüm üst kontrol barlarını %90-%95 oranında zarifleştirmek isterseniz */
-@media screen and (min-width: 1000px) {
-    .panel-trigger-buttons {
-    transform: scale(0.92);
-    transform-origin: left top;
-  }
-}
-
-/* Lisans Overlay (Tüm Ekranı Kaplar) */
+/* LİSANS PENCERESİ */
 .license-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(15, 23, 42, 0.85); /* Koyu mat şeffaf arka plan */
-  backdrop-filter: blur(8px); /* Arkadaki PDF'i hafif bulanıklaştırır */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 99999; /* Her şeyin üstünde kalmasını sağlar */
-  padding: 20px;
-  box-sizing: border-box;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
-/* Aktivasyon Kutusu */
 .license-box {
-  background: #ffffff;
-  padding: 32px 28px;
-  border-radius: 16px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-  max-width: 400px;
-  width: 100%;
-  text-align: center;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #ffffff;
+    padding: 32px 28px;
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .license-box h2 {
-  margin-top: 0;
-  margin-bottom: 8px;
-  color: #0f172a;
-  font-size: 1.5rem;
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: #0f172a;
+    font-size: 1.5rem;
 }
 
 .license-box p {
-  color: #64748b;
-  font-size: 0.92rem;
-  margin-bottom: 24px;
+    color: #64748b;
+    font-size: 0.92rem;
+    margin-bottom: 24px;
 }
 
 .license-box input {
-  width: 100%;
-  padding: 12px 14px;
-  margin-bottom: 14px;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  box-sizing: border-box;
-  outline: none;
-  transition: border-color 0.2s ease;
-}
-
-.license-box input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    outline: none;
 }
 
 .license-box button {
-  width: 100%;
-  padding: 14px;
-  background-color: #2563eb;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+    width: 100%;
+    padding: 14px;
+    background-color: #2563eb;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
 }
 
-.license-box button:hover {
-  background-color: #1d4ed8;
-}
-
-.license-box button:disabled {
-  background-color: #94a3b8;
-  cursor: not-allowed;
-}
-
-/* Hata Mesajı Alanı */
 .error-msg {
-  color: #ef4444;
-  font-size: 0.88rem;
-  margin-top: 14px;
-  font-weight: 500;
-  min-height: 20px;
+    color: #ef4444;
+    font-size: 0.88rem;
+    margin-top: 14px;
+    font-weight: 500;
+    min-height: 20px;
 }
 
-@media screen and (max-width: 768px) {
-    /* Cep telefonlarında logo kapsayıcısını tamamen devre dışı bırakır */
+/*@media screen and (max-width: 768px) {
     .brand-header-container {
         display: none !important;
     }
 
-    /* Mobil ekranlarda sol panelin genişliğini ekran boyutuna göre optimize eder */
     #sidebar-container, 
     #search-sidebar-container, 
     #bookmarks-sidebar-container,
@@ -1274,4 +904,4 @@ button#btn-toggle-shop.active span,
         width: calc(100vw - 98px) !important;
         left: 78px !important;
     }
-}
+}*/

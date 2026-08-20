@@ -103,7 +103,14 @@ function getOrCreateDeviceId() {
 // =========================================================================
 window.addEventListener('DOMContentLoaded', async() => {
 	// DOMContentLoaded içindeki ilk satır:
-	//debugLog("2. DOMContentLoaded tetiklendi.");
+	debugLog("2. DOMContentLoaded tetiklendi.");
+	// 📱 Mobil Ekran Kontrolü: Eğer ekran genişliği 768px'den küçükse logoyu güvenle kaldır
+    if (window.innerWidth <= 768) {
+        const brandLogo = document.querySelector('.brand-header-container');
+        if (brandLogo) {
+            brandLogo.style.display = 'none';
+        }
+    }
 	// 🌟 ÖNCE pencerenin responsive olarak ekrana oturmasını KESİN olarak bekliyoruz
     try {
         // Pencerenin oturmasını kesin olarak bekliyoruz (Tek satır olarak)
@@ -455,7 +462,7 @@ window.addEventListener('DOMContentLoaded', async() => {
 // =========================================================================
 async function loadPDF(url) {
 	// loadPDF(url) içindeki ilk satır:
-	//debugLog("3. loadPDF cagirildi. Yol: " + url);
+	debugLog("3. loadPDF cagirildi. Yol: " + url);
     const loadingScreen = document.getElementById('pdf-loading-screen');
     const loadingProgress = document.getElementById('pdf-loading-progress');
 
