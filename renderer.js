@@ -57,41 +57,50 @@ const displayTitle = "ABONELİK SÖZLEŞMESİNDEN KAYNAKLANAN ALACAK DAVALARI";
 let currentSearchTerm = "";
 const pageRenderLocks = {}; // Mükerrer render isteklerini engelleme kilidi
 
-// 🌐 %100 Garantili Dış Bağlantı Açıcı (Android Webview Fix + Tauri v2 + Fallback)
+// 🌐 %100 Korumalı Çapraz Platform Dış Bağlantı Açıcı
 const handleExternalLink = async (targetUrl) => {
 	if (!targetUrl || targetUrl === '#' || targetUrl.startsWith('javascript:')) return;
-
-	// 1. Tauri v2 Opener Plugin
-	try {
-		if (typeof openUrl === 'function') {
-			await openUrl(targetUrl);
-			return;
-		}
-	} catch (err) {
-		console.warn("Tauri openUrl hatası, fallback deneniyor:", err);
-	}
-
-	// 2. Electron Ortamı
+	
+	// 1. Electron Ortamı
 	if (window.require) {
 		try {
 			const { shell } = window.require('electron');
-			shell.openExternal(targetUrl);
-			return;
-		} catch (e) {}
+			if (shell && shell.openExternal) {
+                shell.openExternal(targetUrl);
+                return;
+            }
+		} catch (e) {
+			console.warn("Electron shell çağrısı başarısız:", e);
+		}
 	}
 	
-	// 3. Android WebView Fallback (Cihazın varsayılan tarayıcısını dışarıdan açmaya zorlar)
-	const isAndroid = /Android/i.test(navigator.userAgent);
-	if (isAndroid && targetUrl.startsWith('http')) {
-		// HTTP/HTTPS URL'yi Android Chrome/System Browser Intent'ine çevirir
-		const cleanUrl = targetUrl.replace(/^https?:\/\//, '');
-		const isHttps = targetUrl.startsWith('https');
-		const intentUrl = `intent://${cleanUrl}#Intent;scheme=${isHttps ? 'https' : 'http'};action=android.intent.action.VIEW;end`;
+	// 2. Tauri v2 Ortamı (Global Enjeksiyon + Opener Plugin Kontrolü)
+    if (window.__TAURI__ || window.__TAURI_INTERNALS__) {
+        try {
+            // A. Öncelik: Global Tauri Opener Objesi
+            if (window.__TAURI__?.opener?.openUrl) {
+                await window.__TAURI__.opener.openUrl(targetUrl);
+                return;
+            } 
+            // B. Öncelik: NPM Plugin Opener Import'u
+            else if (typeof openUrl === 'function') {
+                await openUrl(targetUrl);
+                return;
+            }
+            // C. Öncelik: Özel Rust Komutu (Invoke) Fallback
+            else {
+                const invoke = window.__TAURI_INTERNALS__?.invoke || window.__TAURI__?.core?.invoke;
+                if (invoke) {
+                    await invoke('plugin:opener|open_url', { path: targetUrl });
+                    return;
+                }
+            }
+        } catch (err) {
+            console.warn("Tauri ile link açılamadı, standart fallback deneniyor:", err);
+        }
+    }
 		
-		window.location.href = intentUrl;
-		return;
-	}
-	// 4. Masaüstü Tarayıcı Fallback
+	// 3. Normal Tarayıcı Fallback (WebView adresini değiştirmeden dış pencereler için)
 	window.open(targetUrl, '_blank', 'noopener,noreferrer');
 }; //const handleExternalLink = async (targetUrl) => {
 async function setResponsiveWindow() {
@@ -441,14 +450,13 @@ window.addEventListener('DOMContentLoaded', async() => {
     // 📌 Tıklama Dinleyicisi (Sadece Belirli Buton ve Dış Linkler İçin)
     document.addEventListener('click', async (e) => {
         // Sadece .btn-buy-now, .btn-inspect, .shop-inspect-btn veya target="_blank" olan linkleri yakala
-        const btn = e.target.closest('.btn-buy-now, .shop-inspect-btn, .btn-inspect, a[target="_blank"]');
-        
+        const btn = e.target.closest('.btn-buy-now, .shop-inspect-btn, .btn-inspect');
         if (btn) {
+			e.preventDefault();
             const destination = btn.getAttribute('href') || btn.dataset.link;
             // İç gezinmeleri (hash veya boş linkleri) engelleme, sadece harici http/https linklerini yakala
-            if (destination && destination.startsWith('http')) {
-                e.preventDefault();
-                e.stopPropagation();
+            if (destination) {
+				
                 await handleExternalLink(destination);
             }
         }
