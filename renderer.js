@@ -1,4 +1,3 @@
-import { openUrl } from '@tauri-apps/plugin-opener';
 import { PageFlip } from "page-flip";
 import * as pdfjsLib from "pdfjs-dist";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -57,37 +56,6 @@ const displayTitle = "ABONELİK SÖZLEŞMESİNDEN KAYNAKLANAN ALACAK DAVALARI";
 let currentSearchTerm = "";
 const pageRenderLocks = {}; // Mükerrer render isteklerini engelleme kilidi
 
-// 🌐 %100 Korumalı Çapraz Platform Dış Bağlantı Açıcı
-const handleExternalLink = async (targetUrl) => {
-	if (!targetUrl || targetUrl === '#' || targetUrl.startsWith('javascript:')) return;
-	
-	// 1. Tauri Ortamı (Doğrudan İşletim Sistemine Tetik Gönderir)
-    if (window.__TAURI_INTERNALS__ || window.__TAURI__) {
-        try {
-            const invoke = window.__TAURI_INTERNALS__?.invoke || window.__TAURI__?.core?.invoke;
-            if (invoke) {
-                invoke('open_in_browser', { url: targetUrl });
-                return;
-            }
-        } catch (err) {
-            console.error("Rust komut hatası:", err);
-        }
-    }
-	// 2. Electron Ortamı
-	if (window.require) {
-		try {
-			const { shell } = window.require('electron');
-			if (shell && shell.openExternal) {
-                shell.openExternal(targetUrl);
-                return;
-            }
-		} catch (e) {
-			console.warn("Electron shell çağrısı başarısız:", e);
-		}
-	}
-	// 3. Normal Tarayıcı Fallback (WebView adresini değiştirmeden dış pencereler için)
-	window.open(targetUrl, '_blank');
-}; //const handleExternalLink = async (targetUrl) => {
 	
 async function setResponsiveWindow() {
     try {
@@ -138,15 +106,13 @@ window.addEventListener('DOMContentLoaded', async() => {
 	// DOMContentLoaded içindeki ilk satır:
 	//debugLog("2. DOMContentLoaded tetiklendi.");
 	// 🌟 ÖNCE pencerenin responsive olarak ekrana oturmasını KESİN olarak bekliyoruz
-    /*try {
+    try {
         // Pencerenin oturmasını kesin olarak bekliyoruz (Tek satır olarak)
         await setResponsiveWindow();
     } catch (windowError) {
         console.error("Pencere boyutlandırılırken hata:", windowError);
-    }*/
-	// 🔑 KİLİT ÇÖZÜCÜ: setResponsiveWindow çağrısı arka plana alındı, PDF yüklenmesini engellemez!
-    setResponsiveWindow().catch(e => console.warn(e));
-	
+    }
+		
 	// Uygulama penceresinin üst çerçevesini de günceller
 	document.title = displayTitle;
 
@@ -419,9 +385,39 @@ window.addEventListener('DOMContentLoaded', async() => {
     }
 
     // Uygulama başladığında mağaza yükleme motorunu çalıştır
-    loadShopItems();
+    await loadShopItems();
 	
-    
+    // 🌐 %100 Korumalı Çapraz Platform Dış Bağlantı Açıcı
+	const handleExternalLink = async (targetUrl) => {
+		if (!targetUrl || targetUrl === '#' || targetUrl.startsWith('javascript:')) return;
+		
+		// 1. Tauri Ortamı (Doğrudan İşletim Sistemine Tetik Gönderir)
+		if (window.__TAURI_INTERNALS__ || window.__TAURI__) {
+			try {
+				const invoke = window.__TAURI_INTERNALS__?.invoke || window.__TAURI__?.core?.invoke;
+				if (invoke) {
+					invoke('open_in_browser', { url: targetUrl });
+					return;
+				}
+			} catch (err) {
+				console.error("Rust komut hatası:", err);
+			}
+		}
+		// 2. Electron Ortamı
+		if (window.require) {
+			try {
+				const { shell } = window.require('electron');
+				if (shell && shell.openExternal) {
+					shell.openExternal(targetUrl);
+					return;
+				}
+			} catch (e) {
+				console.warn("Electron shell çağrısı başarısız:", e);
+			}
+		}
+		// 3. Normal Tarayıcı Fallback (WebView adresini değiştirmeden dış pencereler için)
+		window.open(targetUrl, '_blank');
+	}; //const handleExternalLink = async (targetUrl) => {
 
     // 2. Logo Tıklama Dinleyicisi
     const logoLink = document.getElementById('brand-logo-link');
