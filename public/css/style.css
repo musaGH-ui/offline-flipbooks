@@ -459,11 +459,9 @@ button#btn-toggle-shop.active span,
     overflow: hidden !important;
 }
 
-/* 🌟 KİLİTLENMEYİ ÖNLEYEN DÜZELTİLMİŞ KAPANMA SINIFI */
+/* 🔑 DÜZELTME: Sadece display:none ile temiz kapalı kalma kuralı */
 .sidebar-hidden {
     display: none !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
 }
 
 #sidebar-container h3, 
@@ -892,16 +890,3 @@ button#btn-toggle-shop.active span,
     min-height: 20px;
 }
 
-/*@media screen and (max-width: 768px) {
-    .brand-header-container {
-        display: none !important;
-    }
-
-    #sidebar-container, 
-    #search-sidebar-container, 
-    #bookmarks-sidebar-container,
-    #shop-sidebar-container {
-        width: calc(100vw - 98px) !important;
-        left: 78px !important;
-    }
-}*/

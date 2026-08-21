@@ -47,6 +47,8 @@ debugLog("1. renderer.js yuklendi.");
 let pdfDoc = null;
 let totalPages = null;
 let pageFlipInstance = null;
+// Global PDF yüklenme durumunu takip eden bayrak (flag)
+let isPdfLoaded = false;
 //const pdfUrl = `./docs/husumet-izni-d.pdf?t=${new Date().getTime()}`;
 const pdfUrl = 'docs/ACTIVE_PDF_FILE';
 // 2. Kullanıcının ekranda ve pencere başlığında göreceği şık Türkçe başlık
@@ -88,12 +90,10 @@ function getOrCreateDeviceId() {
     let deviceId = localStorage.getItem('DOS_Device_ID');
     if (!deviceId) {
         // Cihaza özel rastgele ve benzersiz UUID türet
-        const userAgent = navigator.userAgent;
-        const screenRes = `${window.screen.width}x${window.screen.height}`;
-        const randomPart = Math.random().toString(36).substring(2, 15);
+        const random1 = Math.random().toString(36).substring(2, 10);
+		const random2 = Math.random().toString(36).substring(2, 10);
         const timeStamp = Date.now().toString(36);
-        
-        deviceId = 'DEV-' + btoa(`${screenRes}-${randomPart}-${timeStamp}`).replace(/=/g, '').substring(0, 32);
+        deviceId = `DEV-${timeStamp}-${random1}-${random2}`.toUpperCase();
         localStorage.setItem('DOS_Device_ID', deviceId);
     }
     return deviceId;
@@ -112,38 +112,57 @@ window.addEventListener('DOMContentLoaded', async() => {
         }
     }
 	// 🌟 ÖNCE pencerenin responsive olarak ekrana oturmasını KESİN olarak bekliyoruz
-    try {
+    /*try {
         // Pencerenin oturmasını kesin olarak bekliyoruz (Tek satır olarak)
         await setResponsiveWindow();
     } catch (windowError) {
         console.error("Pencere boyutlandırılırken hata:", windowError);
-    }
-		
+    }*/
+	// 🌟 KİLİTLENMEYİ ÖNLEYEN DÜZELTME: Pencere ayarını arka planda güvenle tetikle, await ile asılı kalma!
+    setResponsiveWindow().catch(err => console.warn("Pencere boyutlandırma atlandı:", err));	
 	// Uygulama penceresinin üst çerçevesini de günceller
 	document.title = displayTitle;
-
-    //Lisans aktivasyonu
-    const productName = pdfUrl.split('/').pop().replace('.pdf', '');
+	// =========================================================================
+	// GÜVENLİ VE KİLİTLENMEYEN LİSANS AKTİVASYON MOTORU
+	// =========================================================================
+	// 1. Ürün adını güvenle çıkar (Gelişmiş fallback ile)
+    let productName = 'ACTIVE_PDF_FILE';
+	if (typeof pdfUrl === 'string' && pdfUrl) {
+		const fileName = pdfUrl.split('/').pop() || '';
+		productName = fileName.replace(/\.pdf$/i, '');
+	}
     const isActivated = localStorage.getItem('UrunuSatinAlan') === 'true';
     const licenseModal = document.getElementById('license-modal');
 
-    // 1. Aktivasyon Durum Kontrolü
+    // 2. Aktivasyon Durum Kontrolü & PDF Yükleme
     if (!isActivated) {
         if (licenseModal) licenseModal.style.display = 'flex';
+		// PDF arka planda bir kez yüklenir
+		if (typeof loadPDF === 'function' && !isPdfLoaded) {
+			loadPDF(pdfUrl)
+            .then(() => { isPdfLoaded = true; })
+            .catch(err => console.warn("Ön PDF yükleme hatası:", err));
+		}
     } else {
         if (licenseModal) licenseModal.style.display = 'none';
-        await loadPDF(pdfUrl);
+        if (typeof loadPDF === 'function' && !isPdfLoaded) {
+			await loadPDF(pdfUrl);
+			isPdfLoaded = true;
+		}
     }
 
-    // 2. Aktivasyon Form Onayı
+    // 3. Aktivasyon Form Onayı (Zaman Aşımı Korumalı)
     const submitBtn = document.getElementById('lic-submit-btn');
     if (submitBtn) {
         submitBtn.addEventListener('click', async () => {
-            const email = document.getElementById('lic-email').value.trim();
-            const key = document.getElementById('lic-key').value.trim();
-            const errorDiv = document.getElementById('lic-error-msg');
+			const emailInput = document.getElementById('lic-email');
+			const keyInput = document.getElementById('lic-key');
+			const errorDiv = document.getElementById('lic-error-msg');
+            
+			const email = emailInput ? emailInput.value.trim() : '';
+			const key = keyInput ? keyInput.value.trim() : '';
 
-            errorDiv.innerText = '';
+            if (errorDiv) errorDiv.innerText = '';
 
             if (!email || !key) {
                 errorDiv.innerText = 'Lütfen e-posta ve lisans anahtarınızı girin.';
@@ -155,11 +174,17 @@ window.addEventListener('DOMContentLoaded', async() => {
 
             // 🔑 Benzersiz Cihaz ID'sini Al
             const currentDeviceId = getOrCreateDeviceId();
-
+			const currentDeviceId = typeof getOrCreateDeviceId === 'function' ? getOrCreateDeviceId() : 'DEV-UNKNOWN';
+			
+			// 🛡️ 5 Saniyelik AbortController (Network Kilitlenmesini Engeller)
+			const controller = new AbortController();
+			const timeoutId = setTimeout(() => controller.abort(), 5000);
+		
             try {
                 const response = await fetch('https://dosdijitalyayincilik.com/wp-json/dos/v1/verify-license', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+					signal: controller.signal,
                     body: JSON.stringify({
                         email: email,
                         product_name: productName,
@@ -167,7 +192,8 @@ window.addEventListener('DOMContentLoaded', async() => {
                         device_id: currentDeviceId // REST API'ye Cihaz ID'si Gönderiliyor!
                     })
                 });
-
+				
+				clearTimeout(timeoutId);
                 const data = await response.json();
 
                 if (response.ok && data.success) {
@@ -175,14 +201,25 @@ window.addEventListener('DOMContentLoaded', async() => {
                     localStorage.setItem('LicenseUser', email);
                     
                     if (licenseModal) licenseModal.style.display = 'none';
-                    await loadPDF(pdfUrl);
+                    // Eğer bir aksilik olup PDF henüz yüklenmediyse güvenli fallback
+					if (!isPdfLoaded && typeof loadPDF === 'function') {
+						await loadPDF(pdfUrl);
+						isPdfLoaded = true;
+					}
                 } else {
                     // Cihaz uyuşmazlığı veya hatalı anahtar uyarısını göster
                     errorDiv.innerText = data.message || 'Lisans doğrulanamadı.';
                 }
             } catch (err) {
+				clearTimeout(timeoutId);
                 console.error("Aktivasyon Hatası:", err);
-                errorDiv.innerText = 'Bağlantı hatası! İnternet bağlantınızı kontrol edin.';
+                if (errorDiv) {
+					if (err.name === 'AbortError') {
+						errorDiv.innerText = 'Sunucu yanıt vermedi! Lütfen bağlantınızı kontrol edin.';
+					} else {
+						errorDiv.innerText = 'Bağlantı hatası! İnternet bağlantınızı kontrol edin.';
+					}
+				}
             } finally {
                 submitBtn.innerText = 'Aktivasyonu Tamamla';
                 submitBtn.disabled = false;

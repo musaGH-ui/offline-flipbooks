@@ -12,7 +12,7 @@
                 div = document.createElement('div');
                 div.id = 'native-debug';
                 div.style.cssText = 'position:fixed; top:0; left:0; right:0; background:red; color:white; font-family:monospace; font-size:11px; padding:10px; z-index:999999; word-break:break-all; max-height:150px; overflow-y:auto; border-bottom:2px solid black;';
-                document.documentElement.appendChild(div);
+                (document.body || document.documentElement).appendChild(div);
             }
             div.innerHTML += '<div>🚨 HATA: ' + msg + ' <br>📍 Satır: ' + lineNo + ' | Dosya: ' + url + '</div>';
             return false;
@@ -24,14 +24,14 @@
                 div = document.createElement('div');
                 div.id = 'native-debug';
                 div.style.cssText = 'position:fixed; top:0; left:0; right:0; background:red; color:white; font-family:monospace; font-size:11px; padding:10px; z-index:999999; word-break:break-all; max-height:150px; overflow-y:auto; border-bottom:2px solid black;';
-                document.documentElement.appendChild(div);
+                (document.body || document.documentElement).appendChild(div);
             }
             div.innerHTML += '<div>🚨 PROMISE HATA: ' + (e.reason ? (e.reason.message || JSON.stringify(e.reason)) : e) + '</div>';
         };
     </script>
 
-    <link rel="stylesheet" href="/css/pdf_viewer.css">
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="css/pdf_viewer.css">
+    <link rel="stylesheet" href="css/style.css">
 	<link rel="stylesheet" href="css/all.min.css">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, target-densitydpi=device-dpi">
 </head>
@@ -51,7 +51,7 @@
   </div>
 	<div class="brand-header-container">
 		<a href="https://dosdijitalyayincilik.com" id="brand-logo-link" target="_blank" class="brand-logo-wrapper" title="DOS Dijital Yayıncılık Web Sitesi">
-			<img src="/images/Logo_512x800-Photoroom.png" alt="DOS Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+			<img src="images/Logo_512x800-Photoroom.png" alt="DOS Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
 			<div class="logo-fallback" style="display: none;"><i class="fa-solid fa-cubes"></i></div>
 		</a>
 	</div>
@@ -136,6 +136,6 @@
 		</div>
 </div>
 
-    <script type="module" src="./renderer.js"></script>
+    <script type="module" src="renderer.js"></script>
 </body>
 </html>
