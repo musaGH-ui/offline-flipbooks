@@ -173,8 +173,7 @@ window.addEventListener('DOMContentLoaded', async() => {
             submitBtn.disabled = true;
 
             // 🔑 Benzersiz Cihaz ID'sini Al
-            const currentDeviceId = getOrCreateDeviceId();
-			const currentDeviceId = typeof getOrCreateDeviceId === 'function' ? getOrCreateDeviceId() : 'DEV-UNKNOWN';
+            const currentDeviceId = typeof getOrCreateDeviceId === 'function' ? getOrCreateDeviceId() : 'DEV-UNKNOWN';
 			
 			// 🛡️ 5 Saniyelik AbortController (Network Kilitlenmesini Engeller)
 			const controller = new AbortController();
