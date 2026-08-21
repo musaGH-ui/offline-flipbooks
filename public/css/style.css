@@ -87,18 +87,17 @@ body {
 }
 
 .textLayer span.pdf-live-search-match {
-	background-color: rgba(255, 217, 0, 0.85) !important; /* İdeal fosforlu sarı */
+	background-color: rgba(255, 235, 59, 0.55) !important; /* Canlı fosforlu sarı (Metni soldurmaz) */
+	display: inline !important;                            /* 🔑 Satır sonuna kadar uzamasını engeller, tam metin bitiminde durur */
     color: transparent !important;                        /* 🔑 YAZIYI ŞEFFAF YAPAR: Arkadaki orijinal PDF harfi görünür, çift katman taşması olmaz! */
+	mix-blend-mode: normal !important;                     /* 🔑 Soldurma yapan katman karışımını iptal eder */
     border: none !important;
-    border-radius: 0px !important;
+    border-radius: 2px !important;
     box-shadow: none !important;
     outline: none !important;
     padding: 0 !important;
     margin: 0 !important;
-    transform: none !important;                           /* PDF.js'in kendi hesapladığı matris ölçeğini bozmaz */
-    font-size: inherit !important;
-    line-height: inherit !important;
-    mix-blend-mode: multiply !important;                  /* Sarı rengi alt katmandaki harflerle pürüzsüz birleştirir */
+    width: auto !important;                                /* Tüm satırı kaplamasını engeller */
 }
 
 .textLayer *::selection {
