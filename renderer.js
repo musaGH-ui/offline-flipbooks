@@ -69,11 +69,14 @@ async function setResponsiveWindow() {
         // 2. Aktif pencere nesnesini çağırıyoruz (Sadece gerçek Tauri ortamında çalışır)
         const appWindow = getCurrentWindow();
         if (!appWindow || typeof appWindow.setSize !== 'function') return;
-        const screenWidth = window.screen.width;
-        const screenHeight = window.screen.height;
+		// Windows High-DPI ölçekleme oranını alıyoruz
+        const scaleFactor = window.devicePixelRatio || 1;
+        // Ekran çözünürlüğünü fiziki piksellerden bağımsız oranlıyoruz
+        const screenWidth = window.screen.availWidth;
+        const screenHeight = window.screen.availHeight;
 
-        const newWidth = Math.round(screenWidth * 0.85); 
-        const newHeight = Math.round(screenHeight * 0.85); 
+        const newWidth = Math.round((screenWidth * 0.80) / (scaleFactor > 1.25 ? 1.2 : 1)); 
+        const newHeight = Math.round((screenHeight * 0.80) / (scaleFactor > 1.25 ? 1.2 : 1));
 
         // Pencereyi yeni boyuta getir ve ortala
         await appWindow.setSize(new LogicalSize(newWidth, newHeight));
