@@ -87,17 +87,19 @@ body {
 }
 
 .textLayer span.pdf-live-search-match {
-	background-color: rgba(255, 235, 59, 0.55) !important; /* Canlı fosforlu sarı (Metni soldurmaz) */
-	display: inline !important;                            /* 🔑 Satır sonuna kadar uzamasını engeller, tam metin bitiminde durur */
-    color: transparent !important;                        /* 🔑 YAZIYI ŞEFFAF YAPAR: Arkadaki orijinal PDF harfi görünür, çift katman taşması olmaz! */
-	mix-blend-mode: normal !important;                     /* 🔑 Soldurma yapan katman karışımını iptal eder */
-    border: none !important;
-    border-radius: 2px !important;
-    box-shadow: none !important;
-    outline: none !important;
-    padding: 0 !important;
+	background-color: rgba(255, 217, 0, 0.95) !important; /* Orijinal canlı fosforlu neon sarı */
+    color: #000000 !important;                             /* Orijinal net siyah harfler */
+    border-radius: 3px !important;
+    box-shadow: 0 0 4px rgba(255, 217, 0, 0.6) !important;
+    mix-blend-mode: multiply !important;                   /* Orijinal katman birleştirme */
+    
+    /* 🔑 YENİ PDF.JS MİMARİ TAŞMA VE SIKIŞTIRMA FRENLERİ */
+    display: inline-block !important;                      /* Kutuyu tam metin genişliğine kilitler, sağa taşırmaz */
+    width: auto !important;                                /* Satır sonuna kadar uzamayı kesin olarak engeller */
+    height: auto !important;                               /* Dikeyde alt satırın üzerine taşmayı ve kalınlaşmayı engeller */
+    line-height: 1.0 !important;                           /* Dikey alan yüksekliğini harf boyutuna eşitler */
+    padding: 0 2px !important;                             /* Sadece kelime kenarlarına minik kibar marjin verir */
     margin: 0 !important;
-    width: auto !important;                                /* Tüm satırı kaplamasını engeller */
 }
 
 .textLayer *::selection {
