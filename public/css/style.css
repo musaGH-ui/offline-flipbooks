@@ -87,13 +87,18 @@ body {
 }
 
 .textLayer span.pdf-live-search-match {
-	background-color: rgba(255, 217, 0, 0.85) !important; /* Parlak fosforlu sarı */
-    color: inherit !important;                            /* 🔑 Harfin kendi orijinal rengini ve font boyutunu korur */
-    border-radius: 0px !important;                        /* 🔑 Kenarlık ovalleştirme harf genişliğini bozduğu için sıfırlandı */
-    box-shadow: none !important;                           /* 🔑 Gölge taşmalarını engeller */
-    mix-blend-mode: multiply !important;                  /* Arkadaki orijinal metinle harika şekilde kaynaşır */
-    padding: 0 !important;                                /* İç boşluk ekleyip sağdaki kelimeyi kaydırmasını önler */
+	background-color: rgba(255, 217, 0, 0.85) !important; /* İdeal fosforlu sarı */
+    color: transparent !important;                        /* 🔑 YAZIYI ŞEFFAF YAPAR: Arkadaki orijinal PDF harfi görünür, çift katman taşması olmaz! */
+    border: none !important;
+    border-radius: 0px !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 0 !important;
     margin: 0 !important;
+    transform: none !important;                           /* PDF.js'in kendi hesapladığı matris ölçeğini bozmaz */
+    font-size: inherit !important;
+    line-height: inherit !important;
+    mix-blend-mode: multiply !important;                  /* Sarı rengi alt katmandaki harflerle pürüzsüz birleştirir */
 }
 
 .textLayer *::selection {
