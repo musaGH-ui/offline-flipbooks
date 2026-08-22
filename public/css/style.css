@@ -89,24 +89,25 @@ body {
 .textLayer span.pdf-live-search-match {
 	background-color: rgba(255, 235, 59, 0.65) !important; /* Yüksek canlılıkta neon sarı (Soluklaştırma yapmaz) */
     color: transparent !important;  /* 🔑 YAZIYI ŞEFFAF YAPAR: Orijinal canlı PDF harfleri görünür, büyüme yapmaz */
-	mix-blend-mode: normal !important; /* 🔑 Soldurma yapan katman birleştirmesini iptal eder */
-	border: none !important;
-    border-radius: 2px !important;
-    box-shadow: none !important;
+	border-radius: 2px !important;
+	box-shadow: none !important;
 	outline: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	mix-blend-mode: normal !important; /* 🔑 Soldurma yapan katman birleştirmesini iptal eder */
 }
 
 .textLayer mark.pdf-live-search-match {
-    background-color: #ffeb3b !important;              /* Parlak canlı fosfor sarı */
-    color: #000000 !important;                          /* Net canlı siyah harfler */
-    font-weight: bold !important;
-    padding: 0 2px !important;                          /* Sadece kelime kenarlarına minik pay */
+	background-color: #ffeb3b !important;       /* Parlak fosfor sarı zemin */
+    color: inherit !important;                 /* 🔑 HARF BOYUTUNU / RENK MATRIX'İNİ BOZMAZ: Metni sağa kaydırmaz */
+    font-weight: inherit !important;            /* 🔑 HARF GENİŞLİĞİNİ DEĞİŞTİRMEZ: Orijinal mizanpajı korur */
+    font-size: inherit !important;              /* 🔑 PUNTOLARIN BÜYÜMESİNİ KESİN OLARAK ENGELLER */
+    line-height: inherit !important;            /* Dikeyde alt satıra taşmayı engeller */
+    display: inline !important;                 /* 🔑 Satır sonuna uzamayı keser, kelime bitiminde durur */
+    padding: 0 !important;                      /* Kelimeyi genişletip sağa fırlatmaz */
     margin: 0 !important;
     border-radius: 2px !important;
-    display: inline !important;                         /* Satır sonuna uzamaz, kelime bittiği an kesilir */
-    box-shadow: 0 0 4px rgba(255, 235, 59, 0.8) !important;
+    box-shadow: 0 0 4px rgba(255, 235, 59, 0.6) !important;
 }
 
 .textLayer *::selection {

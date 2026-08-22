@@ -901,43 +901,12 @@ async function renderPageLayers(pageNum, pageDiv, width, height) {
             viewport: viewport
         });
         await textLayer.render();
-		// 🌟 YENİ PROJEKSİYON MOTORU: Sayfa ilk çizilirken kelime varsa sınıfla işaretle
+		// 🌟 SAYFA ÇİZİLDİĞİNDE EĞER AKTİF ARAMA VARSA SIFIR SAPMAYLA VURGULA
         if (currentSearchTerm && currentSearchTerm.trim() !== "") {
-            const searchRegex = new RegExp(currentSearchTerm, "i");
-            const spans = textLayerDiv.querySelectorAll('span');
-
-            spans.forEach(span => {
-                if (span.textContent.match(searchRegex)) {
-                    span.classList.add('pdf-live-search-match');
-                }
-            });
+            setTimeout(() => {
+                forceHighlightDirectly(pageNum);
+            }, 50);
         }
-        // Sayfa çizilirken halihazırda bir arama varsa, Custom Highlight API ile sıfır sapma tescille
-        /*if (currentSearchTerm) {
-            const searchRegex = new RegExp(currentSearchTerm, "gi");
-            const spans = textLayerDiv.querySelectorAll('span');
-            const highlightRanges = [];
-
-            spans.forEach(span => {
-                const textNode = span.childNodes[0];
-                if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-                    const text = textNode.textContent;
-                    let match;
-                    while ((match = searchRegex.exec(text)) !== null) {
-                        const range = document.createRange();
-                        range.setStart(textNode, match.index);
-                        range.setEnd(textNode, match.index + match[0].length);
-                        highlightRanges.push(range);
-                    }
-                }
-            });
-
-            if (highlightRanges.length > 0 && typeof Highlight !== 'undefined') {
-                const currentHighlights = CSS.highlights.get('pdf-global-search') || new Highlight();
-                highlightRanges.forEach(range => currentHighlights.add(range));
-                CSS.highlights.set('pdf-global-search', currentHighlights);
-            }
-        }*/
 
         // Katman 3: Annotation Layer
         const pdfLinkService = {
