@@ -87,18 +87,16 @@ body {
 }
 
 .textLayer span.pdf-live-search-match {
-	background-color: rgba(255, 217, 0, 0.95) !important; /* Orijinal canlı fosforlu neon sarı */
-	box-shadow: 0 0 4px rgba(255, 217, 0, 0.6) !important;
-	mix-blend-mode: multiply !important;                   /* Orijinal katman birleştirme */
-    border-radius: 2px !important;
-    
-    /* 🔑 HARF BÜYÜMESİNİ VE TAŞMAYI ÖNLEYEN KRİTİK SIFIRLAMALAR */
-	color: inherit !important;                            /* Harf rengini PDF.js'in kendi orijinal boyutuna bırakır */
-	font-size: inherit !important;                        /* Font boyutunu kesinlikle değiştirmez */
-	line-height: inherit !important;                      /* Satır yüksekliğini bozmaz */
-    display: inline !important;                      /* Satır sonuna uzamayı engeller */
-    padding: 0 !important;                            /* Kelimeyi genişletip sağa taşırmaz */
-    margin: 0 !important;
+	background-color: rgba(255, 217, 0, 0.95) !important; /* Canlı fosforlu neon sarı */
+    color: #000000 !important;                            /* Net siyah harfler */
+    border-radius: 3px !important;
+    box-shadow: 0 0 4px rgba(255, 217, 0, 0.6) !important;
+    mix-blend-mode: multiply !important;
+	/* 🔑 HARF BÜYÜMESİNİ VE TAŞMAYI ENGELLEYEN MİZANPAJ KORUMALARI */
+    position: absolute !important;                        /* PDF.js'in milimetrik konumlandırmasını korur */
+    display: inline-block !important;
+    white-space: pre !important;                          /* Harf ve kelime aralıklarının kaymasını önler */
+    transform-origin: 0% 0% !important;                  /* Metin ölçekleme merkezini sol üst noktaya sabitler */
 }
 
 .textLayer *::selection {

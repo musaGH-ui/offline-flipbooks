@@ -891,6 +891,8 @@ async function renderPageLayers(pageNum, pageDiv, width, height) {
         textLayerDiv.style.position = 'absolute';
         textLayerDiv.style.top = '0';
         textLayerDiv.style.left = '0';
+		// 🔑 KRİTİK EKLEME: PDF.js ölçek faktörünü TextLayer katmanına kilitler
+		textLayerDiv.style.setProperty('--scale-factor', viewport.scale);
         pageDiv.appendChild(textLayerDiv);
 
         const textLayer = new pdfjsLib.TextLayer({
