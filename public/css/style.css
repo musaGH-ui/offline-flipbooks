@@ -98,6 +98,17 @@ body {
     margin: 0 !important;
 }
 
+.textLayer mark.pdf-live-search-match {
+    background-color: #ffeb3b !important;              /* Parlak canlı fosfor sarı */
+    color: #000000 !important;                          /* Net canlı siyah harfler */
+    font-weight: bold !important;
+    padding: 0 2px !important;                          /* Sadece kelime kenarlarına minik pay */
+    margin: 0 !important;
+    border-radius: 2px !important;
+    display: inline !important;                         /* Satır sonuna uzamaz, kelime bittiği an kesilir */
+    box-shadow: 0 0 4px rgba(255, 235, 59, 0.8) !important;
+}
+
 .textLayer *::selection {
     background: rgb(0, 102, 255) !important;
     background-color: rgb(0, 102, 255) !important;

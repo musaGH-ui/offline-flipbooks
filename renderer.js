@@ -991,7 +991,7 @@ async function renderPageLayers(pageNum, pageDiv, width, height) {
 // 5. GLOBAL CUSTOM HIGHLIGHT API BOYAMA MOTORU
 // =========================================================================
 function forceHighlightDirectly(pageNum) {
-    if (!currentSearchTerm) return;
+    if (!currentSearchTerm || currentSearchTerm.trim() === "") return;
     const flipbookContainer = document.getElementById('flipbook-container');
     if (!flipbookContainer) return;
 
@@ -1000,17 +1000,30 @@ function forceHighlightDirectly(pageNum) {
 
     const textLayerDiv = pageDiv.querySelector('.textLayer');
     if (!textLayerDiv) return;
-
-    const searchRegex = new RegExp(currentSearchTerm, "i");
+	
+	// Özel regex karakterlerini kaçır ve büyük/küçük harf duyarsız yap
+    const safeTerm = currentSearchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const searchRegex = new RegExp(`(${safeTerm})`, "gi");
+    
     const spans = textLayerDiv.querySelectorAll('span');
     //const highlightRanges = [];
 	// 🌟 HTML bütünlüğünü bozmadan, tarayıcı fontuyla çakışmadan nokta atışı sınıf giydirme
     spans.forEach(span => {
-        if (span.textContent.match(searchRegex)) {
-            span.classList.add('pdf-live-search-match');
-        } else {
-            span.classList.remove('pdf-live-search-match');
+		// Eğer span önceden işaretlenmişse temizle ve orijinal metnine döndür
+        if (span.dataset.originalText) {
+            span.innerHTML = span.dataset.originalText;
         }
+		
+		const text = span.textContent;
+        if (text && searchRegex.test(text)) {
+            // Orijinal metni sakla
+            if (!span.dataset.originalText) {
+                span.dataset.originalText = text;
+            }
+			// SADECE eşleşen kelimeyi <mark> içine al (Tüm span'ı boyama!)
+            span.innerHTML = text.replace(searchRegex, `<mark class="pdf-live-search-match">$1</mark>`);
+        }
+        
     });
 
     
