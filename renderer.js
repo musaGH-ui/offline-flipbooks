@@ -122,7 +122,7 @@ window.addEventListener('DOMContentLoaded', async() => {
         console.error("Pencere boyutlandırılırken hata:", windowError);
     }*/
 	// 🌟 KİLİTLENMEYİ ÖNLEYEN DÜZELTME: Pencere ayarını arka planda güvenle tetikle, await ile asılı kalma!
-    setResponsiveWindow().catch(err => console.warn("Pencere boyutlandırma atlandı:", err));	
+    //setResponsiveWindow().catch(err => console.warn("Pencere boyutlandırma atlandı:", err));	
 	// Uygulama penceresinin üst çerçevesini de günceller
 	document.title = displayTitle;
 	// =========================================================================
