@@ -94,7 +94,8 @@ body {
     border-radius: 2px !important;
     margin: 0 !important;
     padding: 0 !important;
-    mix-blend-mode: multiply !important;                  /* Fosforlu kalem efekti */
+	box-sizing: border-box !important;
+    mix-blend-mode: normal !important;                  /* Fosforlu kalem efekti */
 }
 
 /* 🌟 KOORDİNAT TABANLI NOKTA ATIŞI FOSFORLU ŞERİT */

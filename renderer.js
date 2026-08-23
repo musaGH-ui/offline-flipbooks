@@ -993,21 +993,23 @@ function forceHighlightDirectly(pageNum) {
                 range.setEnd(textNode, match.index + match[0].length);
 
                 const rects = range.getClientRects();
-                const spanRect = span.getBoundingClientRect();
+                const parentRect = textLayerDiv.getBoundingClientRect();
 
-                if (!spanRect.width || rects.length === 0) continue;
-
+                if (!parentRect.width || rects.length === 0) continue;
+				
+				// 🔑 2 KAT BÜYÜMEYİ ENGELLEYEN GERÇEK ÖLÇEK ÇARPANLARI:
+                const scaleX = parentRect.width / textLayerDiv.clientWidth || 1;
+                const scaleY = parentRect.height / textLayerDiv.clientHeight || 1;
+				
                 for (let i = 0; i < rects.length; i++) {
                     const rect = rects[i];
                     if (rect.width === 0 || rect.height === 0) continue;
 
-                    // 🔑 ÇOKLU SATIRDA PATLAMAYI ENGELLEYEN HESAPLAMA:
-                    // Yatayda: span'ın en başından en sonuna kadar tam genişlik (spanLeft & spanWidth)
-                    // Dikeyde: Sadece aranan kelimenin düştüğü ilgili satırın yüksekliği ve top offset'i
-                    const left = span.offsetLeft;
-                    const top = span.offsetTop + (rect.top - spanRect.top); // Kelimenin bulunduğu dikey satıra kilitler
-                    const width = span.offsetWidth; // Satır başından satır sonuna kadar tam kapsama
-                    const height = rect.height; // Sadece o tek satırın dikey yüksekliği
+                    // 1. Ekran koordinatlarını ölçek çarpanına bölerek tam boyuta çekiyoruz
+                    const left = (rect.left - parentRect.left) / scaleX;
+                    const top = (rect.top - parentRect.top) / scaleY;
+                    const width = (rect.width) / scaleX;
+                    const height = (rect.height) / scaleY;
 
                     if (width <= 0 || height <= 0) continue;
 
