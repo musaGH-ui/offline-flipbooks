@@ -957,7 +957,7 @@ async function renderPageLayers(pageNum, pageDiv, width, height) {
 }
 
 // =========================================================================
-// 5. GLOBAL CUSTOM HIGHLIGHT API BOYAMA MOTORU
+// 🌟 KOORDİNAT TABANLI MİLİMETRİK VURGU MOTORU (DOM BOZMADAN SIFIR KAYMA)
 // =========================================================================
 function forceHighlightDirectly(pageNum) {
     if (!currentSearchTerm || currentSearchTerm.trim() === "") return;
@@ -970,18 +970,53 @@ function forceHighlightDirectly(pageNum) {
     const textLayerDiv = pageDiv.querySelector('.textLayer');
     if (!textLayerDiv) return;
 	
+	// 1. Önce bu sayfadaki var olan eski koordinat kutularını temizle
+    textLayerDiv.querySelectorAll('.pdf-coord-highlight').forEach(el => el.remove());
+	
 	// Özel regex karakterlerini kaçır ve büyük/küçük harf duyarsız yap
     const safeTerm = currentSearchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const searchRegex = new RegExp(`(${safeTerm})`, "gi");
-    
     const spans = textLayerDiv.querySelectorAll('span');
     //const highlightRanges = [];
 	spans.forEach(span => {
-        // DOM/innerHTML DEĞİŞTİRİLMEZ! Sadece metin eşleşirse sınıf verilir
-        if (span.textContent && span.textContent.match(searchRegex)) {
-            span.classList.add('pdf-live-search-match');
-        } else {
-            span.classList.remove('pdf-live-search-match');
+        // Range API kullanarak harfin ekrandaki gerçek piksel dikdörtgenini (BoundingBox) alıyoruz
+        const textNode = span.childNodes[0];
+        if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+            const text = textNode.textContent;
+            let match;
+
+            while ((match = searchRegex.exec(text)) !== null) {
+                try {
+                    const range = document.createRange();
+                    range.setStart(textNode, match.index);
+                    range.setEnd(textNode, match.index + match[0].length);
+
+                    // Harfin/kelimenin ekrandaki kesin geometrik sınırları
+                    const rects = range.getClientRects();
+                    const textLayerRect = textLayerDiv.getBoundingClientRect();
+
+                    for (let i = 0; i < rects.length; i++) {
+                        const rect = rects[i];
+                        if (rect.width === 0 || rect.height === 0) continue;
+
+                        // Metin katmanına göre göreceli (relative) X, Y hesabı
+                        const left = rect.left - textLayerRect.left;
+                        const top = rect.top - textLayerRect.top;
+
+                        // Kelimenin tam üzerine oturacak bağımsız sarı şerit kutusu
+                        const highlightBox = document.createElement('div');
+                        highlightBox.className = 'pdf-coord-highlight';
+                        highlightBox.style.left = `${left}px`;
+                        highlightBox.style.top = `${top}px`;
+                        highlightBox.style.width = `${rect.width}px`;
+                        highlightBox.style.height = `${rect.height}px`;
+
+                        textLayerDiv.appendChild(highlightBox);
+                    }
+                } catch (e) {
+                    console.error("Koordinat alma hatası:", e);
+                }
+            }
         }
     });
 
