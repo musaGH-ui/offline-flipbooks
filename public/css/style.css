@@ -97,6 +97,16 @@ body {
 	mix-blend-mode: multiply !important; /* 🔑 Soldurma yapan katman birleştirmesini iptal eder */
 }
 
+/* 🌟 KOORDİNAT TABANLI NOKTA ATIŞI FOSFORLU ŞERİT */
+.textLayer .pdf-coord-highlight {
+    position: absolute !important;
+    background-color: rgba(255, 235, 59, 0.65) !important; /* Parlak canlı fosfor sarı */
+    pointer-events: none !important;                        /* Fare tıklamalarını engellemez, alttaki metin seçilebilir kalır */
+    z-index: 1 !important;                                  /* Harflerin tam arkasında/üstünde durur */
+    border-radius: 2px !important;
+    mix-blend-mode: multiply !important;                    /* Orijinal harflerle pürüzsüz birleşir */
+}
+
 .textLayer *::selection {
     background: rgb(0, 102, 255) !important;
     background-color: rgb(0, 102, 255) !important;
