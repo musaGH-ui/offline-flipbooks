@@ -991,38 +991,40 @@ function forceHighlightDirectly(pageNum) {
                     range.setStart(textNode, match.index);
                     range.setEnd(textNode, match.index + match[0].length);
 
-                    // Harfin/kelimenin ekrandaki kesin geometrik sınırları
-                    const rects = range.getClientRects();
-                    const parentRect = textLayerDiv.getBoundingClientRect();
+                    const rect = range.getBoundingClientRect();
+                    const spanRect = span.getBoundingClientRect();
 					
-					// 🔑 ÖLÇEK ÇARPANINI BAZ ALAN HESAPLAMA:
-					// textLayerDiv'in ekrandaki gerçek genişliğinin genişlik özelliğine oranı
-					const scaleX = parentRect.width / textLayerDiv.offsetWidth || 1;
-					const scaleY = parentRect.height / textLayerDiv.offsetHeight || 1;
+					if (rect.width === 0 || rect.height === 0 || spanRect.width === 0) continue;
+					
+					// 🔑 ÇİFT TRANSFORM BÜYÜMESİNİ ENGELLEYEN HESAPLAMA:
+                    // Kelimenin span içindeki oransal konumu ve genişliği
+                    const matchOffsetLeftRatio = (rect.left - spanRect.left) / spanRect.width;
+                    const matchWidthRatio = rect.width / spanRect.width;
 
-                    for (let i = 0; i < rects.length; i++) {
-                        const rect = rects[i];
-                        if (rect.width === 0 || rect.height === 0) continue;
+                    // Span'ın textLayerDiv içindeki gerçek JS uzaklıkları
+                    const spanLeft = span.offsetLeft;
+                    const spanTop = span.offsetTop;
+                    const spanWidth = span.offsetWidth;
+                    const spanHeight = span.offsetHeight;
 
-                        // Piksel değerlerini sayfanın iç ölçeğine bölerek milimetrik normalize ediyoruz
-						const left = (rect.left - parentRect.left) / scaleX;
-						const top = (rect.top - parentRect.top) / scaleY;
-                        const width = rect.width / scaleX;
-						const height = rect.height / scaleY;
+                    // Gerçek milimetrik piksel koordinatları
+                    const left = spanLeft + (spanWidth * matchOffsetLeftRatio);
+                    const top = spanTop;
+                    const width = spanWidth * matchWidthRatio;
+                    const height = spanHeight;
+					
+					const highlightBox = document.createElement('div');
+                    highlightBox.className = 'pdf-coord-highlight';
+                    highlightBox.style.left = `${left}px`;
+                    highlightBox.style.top = `${top}px`;
+                    highlightBox.style.width = `${width}px`;
+                    highlightBox.style.height = `${height}px`;
 
-                        // Kelimenin tam üzerine oturacak bağımsız sarı şerit kutusu
-                        const highlightBox = document.createElement('div');
-                        highlightBox.className = 'pdf-coord-highlight';
-                        highlightBox.style.left = `${left}px`;
-                        highlightBox.style.top = `${top}px`;
-                        highlightBox.style.width = `${width}px`;
-                        highlightBox.style.height = `${height}px`;
-
-                        textLayerDiv.appendChild(highlightBox);
-                    }
+                    textLayerDiv.appendChild(highlightBox);
                 } catch (e) {
                     console.error("Koordinat alma hatası:", e);
                 }
+                    
             }
         }
     });
