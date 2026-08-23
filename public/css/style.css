@@ -85,41 +85,17 @@ body {
     box-shadow: none !important;
 }
 
-/* 🌟 BAĞIMSIZ ORTA KATMANDAKİ FOSFOR SARI ŞERİT */
+/* 2. Fosfor Sarı Katmanı (Orta Katman - Z-Index: 2) */
 .highlightLayer .pdf-full-line-match {
     position: absolute !important;
-    background-color: rgba(255, 235, 59, 0.55) !important; /* İdeal fosfor sarı */
+    background-color: rgba(255, 235, 59, 0.85) !important; /* 🔑 CANLI NEON FOSFOR SARI */
     pointer-events: none !important;
     border-radius: 2px !important;
     margin: 0 !important;
     padding: 0 !important;
     box-sizing: border-box !important;
-    mix-blend-mode: multiply !important;                  /* Canvas üzerindeki siyah harfleri fosforlar, grileştirmez */
-}
-
-/* 🌟 ÇOKLU SATIRDA TAŞMAYAN, TEK SATIRI BAŞTAN SONA BÖLEN SHU KURAL */
-.textLayer .pdf-full-line-match {
-    position: absolute !important;
-    background-color: rgba(255, 235, 59, 0.75) !important; /* Canlı fosfor neon sarı */
-    pointer-events: none !important;                        /* Tıklamaları engellemez */
-    z-index: 1 !important;                                  /* 🔑 YAZININ ARKASINA ALIR: Harfleri asla soluklaştırmaz! */
-    border-radius: 2px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-	box-sizing: border-box !important;
-    mix-blend-mode: normal !important;                  /* Fosforlu kalem efekti */
-}
-
-/* 🌟 KOORDİNAT TABANLI NOKTA ATIŞI FOSFORLU ŞERİT */
-.textLayer .pdf-coord-highlight {
-    position: absolute !important;
-    background-color: rgba(255, 235, 59, 0.85) !important; /* Parlak canlı fosfor sarı */
-    pointer-events: none !important;                        /* Fare tıklamalarını engellemez, alttaki metin seçilebilir kalır */
-    z-index: 3 !important;                                  /* Harflerin tam arkasında/üstünde durur */
-    border-radius: 2px !important;
-    mix-blend-mode: multiply !important; /* 🔑 Soldurma yapan katman birleştirmesini engeller */ 
-	margin: 0 !important;
-    padding: 0 !important;
+	opacity: 1 !important;  /* 🔑 Matlaştıran opacity kaldırıldı */
+    mix-blend-mode: normal !important;   /* 🔑 Harfleri grileştiren karıştırma kaldırıldı */               
 }
 
 .textLayer span.pdf-live-search-match {
