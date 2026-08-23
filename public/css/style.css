@@ -85,15 +85,16 @@ body {
     box-shadow: none !important;
 }
 
-.textLayer span.pdf-live-search-match {
-	background-color: rgba(255, 235, 59, 0.75) !important; /* Yüksek canlılıkta neon sarı (Soluklaştırma yapmaz) */
-    color: transparent !important;  /* 🔑 YAZIYI ŞEFFAF YAPAR: Orijinal canlı PDF harfleri görünür, büyüme yapmaz */
-	border-radius: 2px !important;
-	box-shadow: none !important;
-	outline: none !important;
-	padding: 0 !important;
-	margin: 0 !important;
-	mix-blend-mode: multiply !important; /* 🔑 Soldurma yapan katman birleştirmesini iptal eder */
+/* 🌟 ÇOKLU SATIRDA TAŞMAYAN, TEK SATIRI BAŞTAN SONA BÖLEN SHU KURAL */
+.textLayer .pdf-full-line-match {
+    position: absolute !important;
+    background-color: rgba(255, 235, 59, 0.75) !important; /* Canlı fosfor neon sarı */
+    pointer-events: none !important;                        /* Tıklamaları engellemez */
+    z-index: 1 !important;                                  /* 🔑 YAZININ ARKASINA ALIR: Harfleri asla soluklaştırmaz! */
+    border-radius: 2px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    mix-blend-mode: multiply !important;                  /* Fosforlu kalem efekti */
 }
 
 /* 🌟 KOORDİNAT TABANLI NOKTA ATIŞI FOSFORLU ŞERİT */
@@ -107,6 +108,19 @@ body {
 	margin: 0 !important;
     padding: 0 !important;
 }
+
+.textLayer span.pdf-live-search-match {
+	background-color: rgba(255, 235, 59, 0.75) !important; /* Yüksek canlılıkta neon sarı (Soluklaştırma yapmaz) */
+    color: transparent !important;  /* 🔑 YAZIYI ŞEFFAF YAPAR: Orijinal canlı PDF harfleri görünür, büyüme yapmaz */
+	border-radius: 2px !important;
+	box-shadow: none !important;
+	outline: none !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	mix-blend-mode: multiply !important; /* 🔑 Soldurma yapan katman birleştirmesini iptal eder */
+}
+
+
 
 .textLayer *::selection {
     background: rgb(0, 102, 255) !important;

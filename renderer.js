@@ -957,7 +957,7 @@ async function renderPageLayers(pageNum, pageDiv, width, height) {
 }
 
 // =========================================================================
-// 🌟 KOORDİNAT TABANLI MİLİMETRİK VURGU MOTORU (DOM BOZMADAN SIFIR KAYMA)
+// 🌟 ÇOKLU SATIR KORUMALI SATIR BAZLI SIFIR TAŞMALI VURGU MOTORU
 // =========================================================================
 function forceHighlightDirectly(pageNum) {
     if (!currentSearchTerm || currentSearchTerm.trim() === "") return;
@@ -971,64 +971,60 @@ function forceHighlightDirectly(pageNum) {
     if (!textLayerDiv) return;
 	
 	// 1. Önce bu sayfadaki var olan eski koordinat kutularını temizle
-    textLayerDiv.querySelectorAll('.pdf-coord-highlight').forEach(el => el.remove());
+    textLayerDiv.querySelectorAll('.pdf-full-line-match').forEach(el => el.remove());
 	
 	// Özel regex karakterlerini kaçır ve büyük/küçük harf duyarsız yap
     const safeTerm = currentSearchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const searchRegex = new RegExp(`(${safeTerm})`, "gi");
+    const searchRegex = new RegExp(safeTerm, "gi");
     const spans = textLayerDiv.querySelectorAll('span');
     //const highlightRanges = [];
 	spans.forEach(span => {
-        // Range API kullanarak harfin ekrandaki gerçek piksel dikdörtgenini (BoundingBox) alıyoruz
         const textNode = span.childNodes[0];
-        if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-            const text = textNode.textContent;
-            let match;
+        if (!textNode || textNode.nodeType !== Node.TEXT_NODE) return;
 
-            while ((match = searchRegex.exec(text)) !== null) {
-                try {
-                    const range = document.createRange();
-                    range.setStart(textNode, match.index);
-                    range.setEnd(textNode, match.index + match[0].length);
+        const rawText = textNode.textContent;
+        if (!rawText) return;
 
-                    const rect = range.getBoundingClientRect();
-                    const spanRect = span.getBoundingClientRect();
-					
-					if (rect.width === 0 || rect.height === 0 || spanRect.width === 0) continue;
-					
-					// 🔑 ÇİFT TRANSFORM BÜYÜMESİNİ ENGELLEYEN HESAPLAMA:
-                    // Kelimenin span içindeki oransal konumu ve genişliği
-                    const matchOffsetLeftRatio = (rect.left - spanRect.left) / spanRect.width;
-                    const matchWidthRatio = rect.width / spanRect.width;
+        let match;
+        while ((match = searchRegex.exec(rawText)) !== null) {
+            try {
+                const range = document.createRange();
+                range.setStart(textNode, match.index);
+                range.setEnd(textNode, match.index + match[0].length);
 
-                    // Span'ın textLayerDiv içindeki gerçek JS uzaklıkları
-                    const spanLeft = span.offsetLeft;
-                    const spanTop = span.offsetTop;
-                    const spanWidth = span.offsetWidth;
-                    const spanHeight = span.offsetHeight;
+                const rects = range.getClientRects();
+                const spanRect = span.getBoundingClientRect();
 
-                    // Gerçek milimetrik piksel koordinatları
-                    const left = spanLeft + (spanWidth * matchOffsetLeftRatio);
-                    const top = spanTop;
-                    const width = spanWidth * matchWidthRatio;
-                    const height = spanHeight;
-					
-					const highlightBox = document.createElement('div');
-                    highlightBox.className = 'pdf-coord-highlight';
+                if (!spanRect.width || rects.length === 0) continue;
+
+                for (let i = 0; i < rects.length; i++) {
+                    const rect = rects[i];
+                    if (rect.width === 0 || rect.height === 0) continue;
+
+                    // 🔑 ÇOKLU SATIRDA PATLAMAYI ENGELLEYEN HESAPLAMA:
+                    // Yatayda: span'ın en başından en sonuna kadar tam genişlik (spanLeft & spanWidth)
+                    // Dikeyde: Sadece aranan kelimenin düştüğü ilgili satırın yüksekliği ve top offset'i
+                    const left = span.offsetLeft;
+                    const top = span.offsetTop + (rect.top - spanRect.top); // Kelimenin bulunduğu dikey satıra kilitler
+                    const width = span.offsetWidth; // Satır başından satır sonuna kadar tam kapsama
+                    const height = rect.height; // Sadece o tek satırın dikey yüksekliği
+
+                    if (width <= 0 || height <= 0) continue;
+
+                    const highlightBox = document.createElement('div');
+                    highlightBox.className = 'pdf-full-line-match';
                     highlightBox.style.left = `${left}px`;
                     highlightBox.style.top = `${top}px`;
                     highlightBox.style.width = `${width}px`;
                     highlightBox.style.height = `${height}px`;
 
                     textLayerDiv.appendChild(highlightBox);
-                } catch (e) {
-                    console.error("Koordinat alma hatası:", e);
                 }
-                    
+            } catch (e) {
+                console.error("Satır vurgulama hatası:", e);
             }
         }
     });
-
 }
 
 async function executeSearch() {
@@ -1041,7 +1037,7 @@ async function executeSearch() {
         CSS.highlights.clear();
     }*/
 	// 🌟 KESİN ÇÖZÜM: Yeni arama başladığında eski tüm sarı boya sınıflarını dökümandan temizle
-    document.querySelectorAll('.pdf-coord-highlight').forEach(el => el.remove());
+    document.querySelectorAll('.pdf-full-line-match').forEach(el => el.remove());
 	
     if (resultsList) resultsList.innerHTML = "";
     if (resultsCountSpan) resultsCountSpan.textContent = "0";
