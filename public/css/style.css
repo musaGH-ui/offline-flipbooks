@@ -75,14 +75,26 @@ body {
 
 .textLayer {
     opacity: 1 !important;
-    mix-blend-mode: normal !important;
+    z-index: 3 !important;
 }
 
 .textLayer span {
     position: absolute !important;
-    z-index: 2 !important;
     background-color: transparent !important;
+	color: transparent !important; /* 🔑 ŞEFFAF SPAN: Altındaki canlı Canvas yazısını ve sarı şeridi %100 net gösterir */
     box-shadow: none !important;
+}
+
+/* 🌟 BAĞIMSIZ ORTA KATMANDAKİ FOSFOR SARI ŞERİT */
+.highlightLayer .pdf-full-line-match {
+    position: absolute !important;
+    background-color: rgba(255, 235, 59, 0.55) !important; /* İdeal fosfor sarı */
+    pointer-events: none !important;
+    border-radius: 2px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    mix-blend-mode: multiply !important;                  /* Canvas üzerindeki siyah harfleri fosforlar, grileştirmez */
 }
 
 /* 🌟 ÇOKLU SATIRDA TAŞMAYAN, TEK SATIRI BAŞTAN SONA BÖLEN SHU KURAL */

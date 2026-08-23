@@ -881,8 +881,20 @@ async function renderPageLayers(pageNum, pageDiv, width, height) {
         pageDiv.appendChild(canvas);
         const context = canvas.getContext('2d');
         await page.render({ canvasContext: context, viewport: viewport }).promise;
-
-        // Katman 2: Text Layer (PDF.js Modül Uyumlu)
+		
+		// Katman 2: Highlight Layer (Sarı Şeritler İçin Özel Katman)
+		const highlightLayerDiv = document.createElement('div');
+		highlightLayerDiv.className = 'highlightLayer';
+		highlightLayerDiv.style.width = `${width}px`;
+		highlightLayerDiv.style.height = `${height}px`;
+		highlightLayerDiv.style.position = 'absolute';
+		highlightLayerDiv.style.top = '0';
+		highlightLayerDiv.style.left = '0';
+		highlightLayerDiv.style.pointerEvents = 'none';
+		highlightLayerDiv.style.zIndex = '2'; // Canvas üstü, TextLayer altı
+		pageDiv.appendChild(highlightLayerDiv);
+		
+        // Katman 3: Text Layer (PDF.js Modül Uyumlu)
         const textContent = await page.getTextContent();
         const textLayerDiv = document.createElement('div');
         textLayerDiv.className = 'textLayer';
@@ -891,6 +903,7 @@ async function renderPageLayers(pageNum, pageDiv, width, height) {
         textLayerDiv.style.position = 'absolute';
         textLayerDiv.style.top = '0';
         textLayerDiv.style.left = '0';
+		textLayerDiv.style.zIndex = '3'; // En üstte
 		// 🔑 KRİTİK EKLEME: PDF.js ölçek faktörünü TextLayer katmanına kilitler
 		textLayerDiv.style.setProperty('--scale-factor', viewport.scale);
         pageDiv.appendChild(textLayerDiv);
@@ -968,10 +981,14 @@ function forceHighlightDirectly(pageNum) {
     if (!pageDiv) return;
 
     const textLayerDiv = pageDiv.querySelector('.textLayer');
-    if (!textLayerDiv) return;
+	const highlightLayerDiv = pageDiv.querySelector('.highlightLayer');
+    if (!textLayerDiv || !highlightLayerDiv) return;
 	
 	// 1. Önce bu sayfadaki var olan eski koordinat kutularını temizle
-    textLayerDiv.querySelectorAll('.pdf-full-line-match').forEach(el => el.remove());
+    //textLayerDiv.querySelectorAll('.pdf-full-line-match').forEach(el => el.remove());
+	// Eski vurgu kutularını temizle
+    highlightLayerDiv.innerHTML = "";
+	
 	
 	// Özel regex karakterlerini kaçır ve büyük/küçük harf duyarsız yap
     const safeTerm = currentSearchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -993,23 +1010,21 @@ function forceHighlightDirectly(pageNum) {
                 range.setEnd(textNode, match.index + match[0].length);
 
                 const rects = range.getClientRects();
-                const parentRect = textLayerDiv.getBoundingClientRect();
+                const spanRect = span.getBoundingClientRect();
 
-                if (!parentRect.width || rects.length === 0) continue;
+                if (!spanRect.width || rects.length === 0) continue;
 				
-				// 🔑 2 KAT BÜYÜMEYİ ENGELLEYEN GERÇEK ÖLÇEK ÇARPANLARI:
-                const scaleX = parentRect.width / textLayerDiv.clientWidth || 1;
-                const scaleY = parentRect.height / textLayerDiv.clientHeight || 1;
-				
-                for (let i = 0; i < rects.length; i++) {
+				for (let i = 0; i < rects.length; i++) {
                     const rect = rects[i];
                     if (rect.width === 0 || rect.height === 0) continue;
 
-                    // 1. Ekran koordinatlarını ölçek çarpanına bölerek tam boyuta çekiyoruz
-                    const left = (rect.left - parentRect.left) / scaleX;
-                    const top = (rect.top - parentRect.top) / scaleY;
-                    const width = (rect.width) / scaleX;
-                    const height = (rect.height) / scaleY;
+                    // 🔑 ÇOKLU SATIRDA PATLAMAYI ENGELLEYEN HESAPLAMA:
+                    // Yatayda: span'ın en başından en sonuna kadar tam genişlik (spanLeft & spanWidth)
+                    // Dikeyde: Sadece aranan kelimenin düştüğü ilgili satırın yüksekliği ve top offset'i
+                    const left = span.offsetLeft;
+                    const top = span.offsetTop + (rect.top - spanRect.top); // Kelimenin bulunduğu dikey satıra kilitler
+                    const width = span.offsetWidth/2; // Satır başından satır sonuna kadar tam kapsama
+                    const height = rect.height/2; // Sadece o tek satırın dikey yüksekliği
 
                     if (width <= 0 || height <= 0) continue;
 
@@ -1020,7 +1035,7 @@ function forceHighlightDirectly(pageNum) {
                     highlightBox.style.width = `${width}px`;
                     highlightBox.style.height = `${height}px`;
 
-                    textLayerDiv.appendChild(highlightBox);
+                    highlightLayerDiv.appendChild(highlightBox);
                 }
             } catch (e) {
                 console.error("Satır vurgulama hatası:", e);
