@@ -81,20 +81,21 @@ body {
 .textLayer span {
     position: absolute !important;
     background-color: transparent !important;
-	color: transparent !important; /* 🔑 ŞEFFAF SPAN: Altındaki canlı Canvas yazısını ve sarı şeridi %100 net gösterir */
+	color: #000000 !important; /* 🔑 ŞEFFAF SPAN: Altındaki canlı Canvas yazısını ve sarı şeridi %100 net gösterir */
     box-shadow: none !important;
+	text-shadow: none !important;
 }
 
 /* 2. Fosfor Sarı Katmanı (Orta Katman - Z-Index: 2) */
 .highlightLayer .pdf-full-line-match {
     position: absolute !important;
-    background-color: rgba(255, 235, 59, 0.85) !important; /* 🔑 CANLI NEON FOSFOR SARI */
+    background-color: #ffeb3b !important;   /* 🔑 CANLI NEON FOSFOR SARI (#ffeb3b) */
     pointer-events: none !important;
     border-radius: 2px !important;
     margin: 0 !important;
     padding: 0 !important;
     box-sizing: border-box !important;
-	opacity: 1 !important;  /* 🔑 Matlaştıran opacity kaldırıldı */
+	opacity: 0.85 !important;  /* Fosforlu kalemin ideal canlılık oranı */
     mix-blend-mode: normal !important;   /* 🔑 Harfleri grileştiren karıştırma kaldırıldı */               
 }
 
