@@ -976,46 +976,15 @@ function forceHighlightDirectly(pageNum) {
     
     const spans = textLayerDiv.querySelectorAll('span');
     //const highlightRanges = [];
-	// 🌟 HTML bütünlüğünü bozmadan, tarayıcı fontuyla çakışmadan nokta atışı sınıf giydirme
-    spans.forEach(span => {
-		// Eğer span önceden işaretlenmişse temizle ve orijinal metnine döndür
-        if (span.dataset.originalText) {
-            span.innerHTML = span.dataset.originalText;
+	spans.forEach(span => {
+        // DOM/innerHTML DEĞİŞTİRİLMEZ! Sadece metin eşleşirse sınıf verilir
+        if (span.textContent && span.textContent.match(searchRegex)) {
+            span.classList.add('pdf-live-search-match');
+        } else {
+            span.classList.remove('pdf-live-search-match');
         }
-		
-		const text = span.textContent;
-        if (text && searchRegex.test(text)) {
-            // Orijinal metni sakla
-            if (!span.dataset.originalText) {
-                span.dataset.originalText = text;
-            }
-			// SADECE eşleşen kelimeyi <mark> içine al (Tüm span'ı boyama!)
-            span.innerHTML = text.replace(searchRegex, `<mark class="pdf-live-search-match">$1</mark>`);
-        }
-        
     });
 
-    
-    // HTML koduna (<mark>) dokunmadan doğrudan tarayıcı ekran kartından milimetrik boyatıyoruz
-    /*spans.forEach(span => {
-        const textNode = span.childNodes[0];
-        if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-            const text = textNode.textContent;
-            let match;
-            while ((match = searchRegex.exec(text)) !== null) {
-                const range = document.createRange();
-                range.setStart(textNode, match.index);
-                range.setEnd(textNode, match.index + match[0].length);
-                highlightRanges.push(range);
-            }
-        }
-    });*/
-
-    /*if (highlightRanges.length > 0 && typeof Highlight !== 'undefined') {
-        const currentHighlights = CSS.highlights.get('pdf-global-search') || new Highlight();
-        highlightRanges.forEach(range => currentHighlights.add(range));
-        CSS.highlights.set('pdf-global-search', currentHighlights);
-    }*/
 }
 
 async function executeSearch() {
