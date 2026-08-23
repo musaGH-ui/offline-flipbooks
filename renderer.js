@@ -993,23 +993,30 @@ function forceHighlightDirectly(pageNum) {
 
                     // Harfin/kelimenin ekrandaki kesin geometrik sınırları
                     const rects = range.getClientRects();
-                    const textLayerRect = textLayerDiv.getBoundingClientRect();
+                    const parentRect = textLayerDiv.getBoundingClientRect();
+					
+					// 🔑 ÖLÇEK ÇARPANINI BAZ ALAN HESAPLAMA:
+					// textLayerDiv'in ekrandaki gerçek genişliğinin genişlik özelliğine oranı
+					const scaleX = parentRect.width / textLayerDiv.offsetWidth || 1;
+					const scaleY = parentRect.height / textLayerDiv.offsetHeight || 1;
 
                     for (let i = 0; i < rects.length; i++) {
                         const rect = rects[i];
                         if (rect.width === 0 || rect.height === 0) continue;
 
-                        // Metin katmanına göre göreceli (relative) X, Y hesabı
-                        const left = rect.left - textLayerRect.left;
-                        const top = rect.top - textLayerRect.top;
+                        // Piksel değerlerini sayfanın iç ölçeğine bölerek milimetrik normalize ediyoruz
+						const left = (rect.left - parentRect.left) / scaleX;
+						const top = (rect.top - parentRect.top) / scaleY;
+                        const width = rect.width / scaleX;
+						const height = rect.height / scaleY;
 
                         // Kelimenin tam üzerine oturacak bağımsız sarı şerit kutusu
                         const highlightBox = document.createElement('div');
                         highlightBox.className = 'pdf-coord-highlight';
                         highlightBox.style.left = `${left}px`;
                         highlightBox.style.top = `${top}px`;
-                        highlightBox.style.width = `${rect.width}px`;
-                        highlightBox.style.height = `${rect.height}px`;
+                        highlightBox.style.width = `${width}px`;
+                        highlightBox.style.height = `${height}px`;
 
                         textLayerDiv.appendChild(highlightBox);
                     }
@@ -1032,9 +1039,7 @@ async function executeSearch() {
         CSS.highlights.clear();
     }*/
 	// 🌟 KESİN ÇÖZÜM: Yeni arama başladığında eski tüm sarı boya sınıflarını dökümandan temizle
-    document.querySelectorAll('.pdf-live-search-match').forEach(el => {
-        el.classList.remove('pdf-live-search-match');
-    });
+    document.querySelectorAll('.pdf-coord-highlight').forEach(el => el.remove());
 	
     if (resultsList) resultsList.innerHTML = "";
     if (resultsCountSpan) resultsCountSpan.textContent = "0";
@@ -1078,13 +1083,25 @@ async function executeSearch() {
                         <span class="search-snippet">${highlightedSnippet}</span>
                         <span class="search-page-badge">Sayfa ${pageNum}</span>
                     `;
-
+					
+					// 🔑 İLK TIKLAMADA BOYAMA YAPAN DÜZELTME
                     li.addEventListener('click', () => {
                         if (pageFlipInstance) {
-                            pageFlipInstance.turnToPage(pageNum - 1); // 0 tabanlı doğru indeks uçuşu
+                            pageFlipInstance.turnToPage(pageNum - 1);
+                            
+                            // Sayfa çevrilip TextLayer tam render edilsin diye 150ms ve 350ms'de çift tetikleme
+                            setTimeout(() => {
+                                forceHighlightDirectly(pageNum);
+                                // Çift sayfa görünümü için komşu sayfayı da kontrol et
+                                if (pageNum % 2 === 0) forceHighlightDirectly(pageNum - 1);
+                                else forceHighlightDirectly(pageNum + 1);
+                            }, 150);
+
+                            setTimeout(() => {
+                                forceHighlightDirectly(pageNum);
+                            }, 350);
                         }
                     });
-
                     if (resultsList) resultsList.appendChild(li);
                 });
             }

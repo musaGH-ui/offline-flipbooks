@@ -100,11 +100,12 @@ body {
 /* 🌟 KOORDİNAT TABANLI NOKTA ATIŞI FOSFORLU ŞERİT */
 .textLayer .pdf-coord-highlight {
     position: absolute !important;
-    background-color: rgba(255, 235, 59, 0.65) !important; /* Parlak canlı fosfor sarı */
+    background-color: rgba(255, 235, 59, 0.85) !important; /* Parlak canlı fosfor sarı */
     pointer-events: none !important;                        /* Fare tıklamalarını engellemez, alttaki metin seçilebilir kalır */
-    z-index: 1 !important;                                  /* Harflerin tam arkasında/üstünde durur */
+    z-index: 0 !important;                                  /* Harflerin tam arkasında/üstünde durur */
     border-radius: 2px !important;
-    mix-blend-mode: multiply !important;                    /* Orijinal harflerle pürüzsüz birleşir */
+    mix-blend-mode: normal !important; /* 🔑 Soldurma yapan katman birleştirmesini engeller */ 
+	box-shadow: 0 0 3px rgba(255, 235, 59, 0.5) !important;
 }
 
 .textLayer *::selection {
