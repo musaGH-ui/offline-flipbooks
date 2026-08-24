@@ -53,12 +53,14 @@ body {
 
 /* Flipbook Alanı */
 .main-content {
-    flex: 1;
+	flex: 1;
+    position: relative;
+    overflow: auto !important; /* 🔑 ZOOM YAPILDIĞINDA SCROLL-BAR ÇIKARAN KRİTİK KURAL */
+    width: 100%;
+    height: 100%;
     display: flex;
-    justify-content: center;
+    justify-content: center;   /* Varsayılanda (Zoom = 1) ortalar */
     align-items: center;
-    padding: 40px;
-    overflow: auto;
 }
 
 .flipbook {
@@ -172,14 +174,8 @@ pageDiv canvas {
 }
 
 #flipbook-container {
-    position: relative; 
-    max-width: 95vw;
-    max-height: 85vh;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    transform-origin: center center;
-    flex-shrink: 0;
+    transition: transform 0.2s ease-out; /* Pürüzsüz büyütme efekti */
+    box-sizing: border-box;
 }
 
 .page-flip,

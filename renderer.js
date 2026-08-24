@@ -771,30 +771,37 @@ async function initFlipbook() {
     document.getElementById('btn-zoom-in').addEventListener('click', () => {
         if (zoomLevel < 3.2) {// Göz yormayacak maksimum zoom sınırı
             zoomLevel += 0.20;// Her tıkta %20 büyüt
+			// 🔑 1. ODAK NOKTASI: Sol üst köşeye sabitliyoruz (Sola kaçmayı kesin engeller)
+			flipbookContainer.style.transformOrigin = '0 0';
             flipbookContainer.style.transform = `scale(${zoomLevel})`;
-            flipbookContainer.style.transformOrigin = 'center center';
-			// 🌟 TARAYICIYI TETİKLEME: Kapsayıcı alana, içeriğin büyüdüğünü ve 
-            // scroll-bar çıkarması gerektiğini bildirmek için margin veriyoruz
-            if (zoomLevel > 1) {
-                const extraSpace = (zoomLevel - 1) * 100;
-                flipbookContainer.style.margin = `${extraSpace}px`;
-            }
+			
+			// 🔑 2. GERÇEK ALAN HESABI: Kapsayıcı `.main-content` alanını büyütüyoruz
+			// Orijinal boyutları zoom katsayısıyla çarparak sağa ve aşağı doğru genişletiyoruz
+            const origWidth = flipbookContainer.offsetWidth;
+			const origHeight = flipbookContainer.offsetHeight;
+			
+			flipbookContainer.style.margin = '0'; // Eski margin müdahalelerini sıfırla
+			
+			// `.main-content` içerisindeki kaydırma alanını genişletiyoruz
+			flipbookContainer.style.width = `${origWidth}px`; 
+			flipbookContainer.style.height = `${origHeight}px`;
         }
     });
 
     document.getElementById('btn-zoom-out').addEventListener('click', () => {
-        zoomLevel = Math.max(1.0, zoomLevel - 0.20);
-        flipbookContainer.style.transform = `scale(${zoomLevel})`;
-		if (zoomLevel === 1.0) {
-            flipbookContainer.style.margin = "0px";
-            if (mainContentArea) {
-                mainContentArea.scrollLeft = 0;
-                mainContentArea.scrollTop = 0;
-            }
+        if (zoomLevel > 1.0) {
+        zoomLevel -= 0.20;
+        if (zoomLevel < 1.0) zoomLevel = 1.0;
+
+        if (zoomLevel === 1.0) {
+            // Normal boyuta dönünce stilleri sıfırla ve merkeze al
+            flipbookContainer.style.transform = 'none';
+            flipbookContainer.style.transformOrigin = 'center center';
         } else {
-            const extraSpace = (zoomLevel - 1) * 100;
-            flipbookContainer.style.margin = `${extraSpace}px`;
+            flipbookContainer.style.transformOrigin = '0 0';
+            flipbookContainer.style.transform = `scale(${zoomLevel})`;
         }
+    }
     });
     
     document.getElementById('btn-fullscreen').addEventListener('click', () => {
