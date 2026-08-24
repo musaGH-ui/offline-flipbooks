@@ -97,17 +97,16 @@ pageDiv canvas {
 /* Katman 2: Fosfor Sarı Katmanı (Canvas Üstü - Z-Index: 2) */
 .highlightLayer .pdf-full-line-match {
     position: absolute !important;
-    background-color: #ffe500 !important; /* 🔑 İDEAL CANLI NEON SARI */
+    background-color: rgba(255, 230, 0, 0.45) !important; /* 🔑 İDEAL CANLI NEON SARI */
     pointer-events: none !important;
     border-radius: 2px !important;
     margin: 0 !important;
     padding: 0 !important;
     box-sizing: border-box !important;
 	/* 🔑 YAZI SOLDURMAYI ENGELLEYEN WEBKIT DONANIM KİLİTLERİ: */
-    mix-blend-mode: multiply !important;     /* Canvas üzerindeki siyah harfleri %100 korur */
-    opacity: 0.85 !important;                /* İdeal fosfor geçirgenliği */
-    transform: translateZ(0) !important;     /* WebView2 GPU katmanını zorlar, harf etrafını bulanıklaştırmaz */
-    will-change: transform !important;             
+    mix-blend-mode: normal !important;     /* Canvas üzerindeki siyah harfleri %100 korur */
+    opacity: 1 !important;                /* İdeal fosfor geçirgenliği */
+    
 }
 
 /* Katman 3: Metin Seçim Katmanı (En Üstte - Z-Index: 3) */
