@@ -769,23 +769,12 @@ async function initFlipbook() {
     const flipbookContainer = document.getElementById('flipbook-container');
 	const mainContentArea = document.querySelector('.main-content');
     document.getElementById('btn-zoom-in').addEventListener('click', () => {
-        if (zoomLevel < 3.2) {// Göz yormayacak maksimum zoom sınırı
-            zoomLevel += 0.20;// Her tıkta %20 büyüt
-			// 🔑 1. ODAK NOKTASI: Sol üst köşeye sabitliyoruz (Sola kaçmayı kesin engeller)
+        if (zoomLevel < 3.2) {
+			zoomLevel += 0.20;
 			flipbookContainer.style.transformOrigin = '0 0';
-            flipbookContainer.style.transform = `scale(${zoomLevel})`;
-			
-			// 🔑 2. GERÇEK ALAN HESABI: Kapsayıcı `.main-content` alanını büyütüyoruz
-			// Orijinal boyutları zoom katsayısıyla çarparak sağa ve aşağı doğru genişletiyoruz
-            const origWidth = flipbookContainer.offsetWidth;
-			const origHeight = flipbookContainer.offsetHeight;
-			
-			flipbookContainer.style.margin = '0'; // Eski margin müdahalelerini sıfırla
-			
-			// `.main-content` içerisindeki kaydırma alanını genişletiyoruz
-			flipbookContainer.style.width = `${origWidth}px`; 
-			flipbookContainer.style.height = `${origHeight}px`;
-        }
+			flipbookContainer.style.transform = `scale(${zoomLevel})`;
+			flipbookContainer.style.margin = '0';
+		}
     });
 
     document.getElementById('btn-zoom-out').addEventListener('click', () => {
