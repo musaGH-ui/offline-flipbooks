@@ -81,7 +81,7 @@ body {
 .textLayer span {
     position: absolute !important;
     background-color: transparent !important;
-	color: #000000 !important; /* 🔑 ŞEFFAF SPAN: Altındaki canlı Canvas yazısını ve sarı şeridi %100 net gösterir */
+	color: transparent !important; /* 🔑 ŞEFFAF SPAN: Altındaki canlı Canvas yazısını ve sarı şeridi %100 net gösterir */
     box-shadow: none !important;
 	text-shadow: none !important;
 }
@@ -96,7 +96,7 @@ body {
     padding: 0 !important;
     box-sizing: border-box !important;
 	opacity: 0.85 !important;  /* Fosforlu kalemin ideal canlılık oranı */
-    mix-blend-mode: normal !important;   /* 🔑 Harfleri grileştiren karıştırma kaldırıldı */               
+    mix-blend-mode: multiply !important;   /* 🔑 Harfleri grileştiren karıştırma kaldırıldı */               
 }
 
 .textLayer span.pdf-live-search-match {
