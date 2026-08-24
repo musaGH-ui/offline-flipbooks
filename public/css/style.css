@@ -83,6 +83,7 @@ pageDiv canvas {
     top: 0;
     left: 0;
     z-index: 1 !important;
+	transform: translateZ(0) !important; /* GPU katmanını kilitler */
 }
 
 /* Katman 2: Fosfor Sarı Katmanı (Canvas Üstü - Z-Index: 2) */
@@ -97,7 +98,7 @@ pageDiv canvas {
 /* Katman 2: Fosfor Sarı Katmanı (Canvas Üstü - Z-Index: 2) */
 .highlightLayer .pdf-full-line-match {
     position: absolute !important;
-    background-color: rgba(255, 230, 0, 0.45) !important; /* 🔑 İDEAL CANLI NEON SARI */
+    background-color: rgba(255, 230, 0, 0.40) !important; /* 🔑 İDEAL CANLI NEON SARI */
     pointer-events: none !important;
     border-radius: 2px !important;
     margin: 0 !important;
@@ -106,7 +107,10 @@ pageDiv canvas {
 	/* 🔑 YAZI SOLDURMAYI ENGELLEYEN WEBKIT DONANIM KİLİTLERİ: */
     mix-blend-mode: normal !important;     /* Canvas üzerindeki siyah harfleri %100 korur */
     opacity: 1 !important;                /* İdeal fosfor geçirgenliği */
-    
+    /* 🔑 YAZININ SOLUKLAŞMASINI %100 ENGELLEYEN DONANIM KİLİTLERİ: */
+    transform: translate3d(0, 0, 0) !important;
+    will-change: transform !important;
+    backface-visibility: hidden !important;
 }
 
 /* Katman 3: Metin Seçim Katmanı (En Üstte - Z-Index: 3) */
