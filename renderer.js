@@ -1022,9 +1022,10 @@ function forceHighlightDirectly(pageNum) {
                     // Yatayda: span'ın en başından en sonuna kadar tam genişlik (spanLeft & spanWidth)
                     // Dikeyde: Sadece aranan kelimenin düştüğü ilgili satırın yüksekliği ve top offset'i
                     const left = span.offsetLeft;
-                    const top = span.offsetTop + (rect.top - spanRect.top); // Kelimenin bulunduğu dikey satıra kilitler
+                    const top = span.offsetTop + ((rect.top - spanRect.top) / 2);
                     const width = span.offsetWidth/2; // Satır başından satır sonuna kadar tam kapsama
-                    const height = rect.height/2; // Sadece o tek satırın dikey yüksekliği
+                    const lineFontSize = parseFloat(window.getComputedStyle(span).fontSize) || rect.height;
+                    const height = (lineFontSize / 2);
 
                     if (width <= 0 || height <= 0) continue;
 
