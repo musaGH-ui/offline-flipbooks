@@ -86,16 +86,28 @@ pageDiv canvas {
 }
 
 /* Katman 2: Fosfor Sarı Katmanı (Canvas Üstü - Z-Index: 2) */
+.highlightLayer {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    z-index: 2 !important;
+    pointer-events: none !important;
+}
+
+/* Katman 2: Fosfor Sarı Katmanı (Canvas Üstü - Z-Index: 2) */
 .highlightLayer .pdf-full-line-match {
     position: absolute !important;
-    background-color: rgba(255, 235, 59, 0.65) !important; /* 🔑 İDEAL CANLI NEON SARI */
+    background-color: #ffe500 !important; /* 🔑 İDEAL CANLI NEON SARI */
     pointer-events: none !important;
     border-radius: 2px !important;
     margin: 0 !important;
     padding: 0 !important;
     box-sizing: border-box !important;
-	opacity: 1 !important;  /* Fosforlu kalemin ideal canlılık oranı */
-    mix-blend-mode: normal !important;   /* 🔑 Harfleri grileştiren karıştırma kaldırıldı */               
+	/* 🔑 YAZI SOLDURMAYI ENGELLEYEN WEBKIT DONANIM KİLİTLERİ: */
+    mix-blend-mode: multiply !important;     /* Canvas üzerindeki siyah harfleri %100 korur */
+    opacity: 0.85 !important;                /* İdeal fosfor geçirgenliği */
+    transform: translateZ(0) !important;     /* WebView2 GPU katmanını zorlar, harf etrafını bulanıklaştırmaz */
+    will-change: transform !important;             
 }
 
 /* Katman 3: Metin Seçim Katmanı (En Üstte - Z-Index: 3) */
@@ -110,6 +122,9 @@ pageDiv canvas {
 	color: transparent !important; /* 🔑 ŞEFFAF SPAN: Altındaki canlı Canvas yazısını ve sarı şeridi %100 net gösterir */
     box-shadow: none !important;
 	text-shadow: none !important;
+	/* 🔑 SHADOW VE BLUR FİLTRELERİNİ KESEN KURAL */
+    -webkit-font-smoothing: antialiased !important;
+    filter: none !important;
 }
 
 
