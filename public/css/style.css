@@ -73,20 +73,19 @@ body {
     overflow: hidden;
 }
 
-.textLayer {
-    opacity: 1 !important;
-    z-index: 3 !important;
-}
+/* =========================================================================
+   🌟 TAURI WEBVIEW2 - SIFIR BULANIKLIK VE CANLI FOSFOR MİMARİSİ
+   ========================================================================= */
 
-.textLayer span {
+/* Katman 1: Canvas (JavaScript tarafında orijinal renderına hiç dokunulmadı) */
+pageDiv canvas {
     position: absolute !important;
-    background-color: transparent !important;
-	color: transparent !important; /* 🔑 ŞEFFAF SPAN: Altındaki canlı Canvas yazısını ve sarı şeridi %100 net gösterir */
-    box-shadow: none !important;
-	text-shadow: none !important;
+    top: 0;
+    left: 0;
+    z-index: 1 !important;
 }
 
-/* 2. Fosfor Sarı Katmanı (Orta Katman - Z-Index: 2) */
+/* Katman 2: Fosfor Sarı Katmanı (Canvas Üstü - Z-Index: 2) */
 .highlightLayer .pdf-full-line-match {
     position: absolute !important;
     background-color: #ffeb3b !important;   /* 🔑 CANLI NEON FOSFOR SARI (#ffeb3b) */
@@ -98,6 +97,26 @@ body {
 	opacity: 0.85 !important;  /* Fosforlu kalemin ideal canlılık oranı */
     mix-blend-mode: multiply !important;   /* 🔑 Harfleri grileştiren karıştırma kaldırıldı */               
 }
+
+/* Katman 3: Metin Seçim Katmanı (En Üstte - Z-Index: 3) */
+.textLayer {
+    opacity: 1 !important;
+    z-index: 3 !important;
+}
+
+.textLayer span {
+    position: absolute !important;
+    background-color: transparent !important;
+	color: transparent !important; /* 🔑 ŞEFFAF SPAN: Altındaki canlı Canvas yazısını ve sarı şeridi %100 net gösterir */
+    box-shadow: none !important;
+	text-shadow: none !important;
+	/* 🔑 KANVAS NETLİĞİNİ KORUYAN KRİTİK 2 KURAL: */
+    /* WebView2'nin şeffaf harflere uyguladığı gölgeyi ve kenar bulanıklığını tamamen kapatır */
+    -webkit-font-smoothing: antialiased !important;
+    filter: none !important;
+}
+
+
 
 .textLayer span.pdf-live-search-match {
 	background-color: rgba(255, 235, 59, 0.75) !important; /* Yüksek canlılıkta neon sarı (Soluklaştırma yapmaz) */
