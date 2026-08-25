@@ -63,10 +63,9 @@ body {
     height: 100%;
     display: flex;
     justify-content: center;   /* Varsayılanda (Zoom = 1) ortalar */
-    align-items: flex-start;   /* 🔑 ZIPLAMAYI BİTİREN KURAL: Dikeyde üste çiviler (center yerine flex-start) */
-	padding-top: 15px;         /* Kitabın tepeden güzel bir payla durması için */
-    box-sizing: border-box;
-	overscroll-behavior: contain !important;      /* 🔑 MOBİLDE SAYFANIN DİŞARIYA KAÇMASINI KESER *
+    align-items: center;   /* 🔑 ZIPLAMAYI BİTİREN KURAL: Dikeyde üste çiviler (center yerine flex-start) */
+	box-sizing: border-box;
+	overscroll-behavior: contain !important;      /* 🔑 MOBİLDE SAYFANIN DİŞARIYA KAÇMASINI KESER */
 }
 
 /* 🔑 MOBİL SCROLLBAR'LARI GÖRÜNÜR YAPMA */
@@ -109,10 +108,8 @@ body {
 .page-flip,
 .st-page-flip,
 .st-flipbook {
-    max-width: 95vw;
-    max-height: 85vh;
-    width: 100%;
-    height: 100%;
+    max-width: 100% !important;            /* 🔑 MİZANPAJ FIX: Mobil ekranda sayfa oranlarını kırmaması için */
+    max-height: 100% !important;
     overflow: hidden !important;
     transform-origin: center center;
     flex-shrink: 0;
