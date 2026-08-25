@@ -51,18 +51,38 @@ body {
     background: #444;
 }
 
-/* Flipbook Alanı */
+/* =========================================================================
+   📱 MOBİL & APK DOKUNMATİK KAYDIRMA KİLİTLERİ
+   ========================================================================= */
 .main-content {
 	flex: 1;
     position: relative;
     overflow: auto !important; /* 🔑 ZOOM YAPILDIĞINDA SCROLL-BAR ÇIKARAN KRİTİK KURAL */
+	-webkit-overflow-scrolling: touch !important; /* 🔑 MOBİL SÜRÜKLEMEYİ YAĞ GİBİ AKICI YAPAR */
     width: 100%;
     height: 100%;
     display: flex;
     justify-content: center;   /* Varsayılanda (Zoom = 1) ortalar */
     align-items: flex-start;   /* 🔑 ZIPLAMAYI BİTİREN KURAL: Dikeyde üste çiviler (center yerine flex-start) */
-	padding-top: 20px;         /* Kitabın tepeden güzel bir payla durması için */
+	padding-top: 15px;         /* Kitabın tepeden güzel bir payla durması için */
     box-sizing: border-box;
+	overscroll-behavior: contain !important;      /* 🔑 MOBİLDE SAYFANIN DİŞARIYA KAÇMASINI KESER *
+}
+
+/* 🔑 MOBİL SCROLLBAR'LARI GÖRÜNÜR YAPMA */
+.main-content::-webkit-scrollbar {
+    display: block !important;
+    width: 6px !important;
+    height: 6px !important;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-radius: 4px !important;
+}
+
+.main-content::-webkit-scrollbar-track {
+    background: transparent !important;
 }
 
 .flipbook {

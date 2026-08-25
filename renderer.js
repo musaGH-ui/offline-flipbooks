@@ -768,12 +768,28 @@ async function initFlipbook() {
 	
     const flipbookContainer = document.getElementById('flipbook-container');
 	const mainContentArea = document.querySelector('.main-content');
+	// 🔑 Mobil/WebView tarafında taşma hesabını katlamadan kilitlik tutan taban boyutlar
+	let baseWidth = 0;
+	let baseHeight = 0;
+	
     document.getElementById('btn-zoom-in').addEventListener('click', () => {
         if (zoomLevel < 3.2) {
+			// İlk zoom tıkında orijinal 1x boyutları hafızaya sabitliyoruz
+			if (baseWidth === 0) {
+				baseWidth = flipbookContainer.offsetWidth;
+				baseHeight = flipbookContainer.offsetHeight;
+			}
 			zoomLevel += 0.20;
+			
 			flipbookContainer.style.transformOrigin = '0 0';
 			flipbookContainer.style.transform = `scale(${zoomLevel})`;
 			flipbookContainer.style.margin = '0';
+			
+			// 🔑 1. SCROLL-BAR ALANI: Taşmayı tetiklemek için genişliği Zoom oranıyla genişletiyoruz
+			flipbookContainer.style.width = `${baseWidth * zoomLevel}px`;
+			flipbookContainer.style.height = `${baseHeight * zoomLevel}px`;
+			// 🔑 2. MOBİL DOKUNMATİK KİLİT: Sürüklemenin sayfa çevirmesini değil, pan (kaydırma) yapmasını sağlar
+			flipbookContainer.style.touchAction = 'pan-x pan-y';
 		}
     });
 
@@ -786,11 +802,18 @@ async function initFlipbook() {
             // Normal boyuta dönünce stilleri sıfırla ve merkeze al
             flipbookContainer.style.transform = 'none';
             flipbookContainer.style.transformOrigin = 'center center';
+			flipbookContainer.style.width = '';
+            flipbookContainer.style.height = '';
+			// Dokunmatik sayfa çevirme jestini normale döndür
+            flipbookContainer.style.touchAction = 'manipulation';
         } else {
             flipbookContainer.style.transformOrigin = '0 0';
             flipbookContainer.style.transform = `scale(${zoomLevel})`;
-        }
-    }
+			flipbookContainer.style.width = `${baseWidth * zoomLevel}px`;
+            flipbookContainer.style.height = `${baseHeight * zoomLevel}px`;
+            flipbookContainer.style.touchAction = 'pan-x pan-y';
+			}
+		}
     });
     
     document.getElementById('btn-fullscreen').addEventListener('click', () => {
