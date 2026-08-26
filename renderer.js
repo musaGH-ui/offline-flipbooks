@@ -791,6 +791,10 @@ async function initFlipbook() {
 			// 🔑 1. KRİTİK DOKUNMATİK ÇÖZÜM: StPageFlip'in sürüklemeyi yutmasını engeller!
 			// Dokunma olaylarını kütüphaneden söküp .main-content kaydırma alanına verir.
 			flipbookContainer.style.pointerEvents = 'none';
+			const allChildren = flipbookContainer.querySelectorAll('*');
+			allChildren.forEach(child => {
+				child.style.pointerEvents = 'none';
+			});
 		}
     });
 
@@ -806,8 +810,12 @@ async function initFlipbook() {
 				flipbookContainer.style.width = '';
 				flipbookContainer.style.height = '';
 				flipbookContainer.style.margin = '0 auto'; // Merkeze al
-				// 🔑 1.0 SEVİYESİNDE SAYFA ÇEVİRMEYİ REFREŞ ET: Tıklamaları ve sayfa çevirmeyi tekrar aç
+				// Dokunma ve tıklamaları tekrar aç
 				flipbookContainer.style.pointerEvents = 'auto';
+				const allChildren = flipbookContainer.querySelectorAll('*');
+				allChildren.forEach(child => {
+					child.style.pointerEvents = 'auto';
+				});
 				
 			} else {
 				flipbookContainer.style.transformOrigin = '0 0';
@@ -817,6 +825,10 @@ async function initFlipbook() {
 				flipbookContainer.style.margin = '0';
 				// Zoom devam ettiği sürece kütüphanenin dokunmayı yutmasını engellemeye devam et
 				flipbookContainer.style.pointerEvents = 'none';
+				const allChildren = flipbookContainer.querySelectorAll('*');
+				allChildren.forEach(child => {
+					child.style.pointerEvents = 'none';
+				});
 			}
 		}
    });
