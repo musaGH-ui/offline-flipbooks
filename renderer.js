@@ -788,13 +788,14 @@ async function initFlipbook() {
 			// 🔑 1. SCROLL-BAR ALANI: Taşmayı tetiklemek için genişliği Zoom oranıyla genişletiyoruz
 			flipbookContainer.style.width = `${baseWidth * zoomLevel}px`;
 			flipbookContainer.style.height = `${baseHeight * zoomLevel}px`;
-			// 🔑 1. KRİTİK DOKUNMATİK ÇÖZÜM: StPageFlip'in sürüklemeyi yutmasını engeller!
-			// Dokunma olaylarını kütüphaneden söküp .main-content kaydırma alanına verir.
-			flipbookContainer.style.pointerEvents = 'none';
-			const allChildren = flipbookContainer.querySelectorAll('*');
-			allChildren.forEach(child => {
-				child.style.pointerEvents = 'none';
-			});
+			// 🔑 NİHAİ ÇÖZÜM: Var olan blockFlipEvents fonksiyonunu Capture fazında (true) bağlıyoruz!
+			// Parmağınla kaydırdığında StPageFlip bunu sayfa çevirme sanamaz!
+			flipbookContainer.addEventListener('touchstart', blockFlipEvents, true);
+			flipbookContainer.addEventListener('touchmove', blockFlipEvents, true);
+			flipbookContainer.addEventListener('mousedown', blockFlipEvents, true);
+			flipbookContainer.addEventListener('mousemove', blockFlipEvents, true);
+        
+			flipbookContainer.style.touchAction = 'pan-x pan-y';
 		}
     });
 
@@ -810,12 +811,12 @@ async function initFlipbook() {
 				flipbookContainer.style.width = '';
 				flipbookContainer.style.height = '';
 				flipbookContainer.style.margin = '0 auto'; // Merkeze al
-				// Dokunma ve tıklamaları tekrar aç
-				flipbookContainer.style.pointerEvents = 'auto';
-				const allChildren = flipbookContainer.querySelectorAll('*');
-				allChildren.forEach(child => {
-					child.style.pointerEvents = 'auto';
-				});
+				flipbookContainer.style.touchAction = 'manipulation';
+				// 🔑 Normal boyuta (1.0) dönünce olay kilitlerini kaldırıyoruz (Sayfa çevirme tekrar açılır)
+				flipbookContainer.removeEventListener('touchstart', blockFlipEvents, true);
+				flipbookContainer.removeEventListener('touchmove', blockFlipEvents, true);
+				flipbookContainer.removeEventListener('mousedown', blockFlipEvents, true);
+				flipbookContainer.removeEventListener('mousemove', blockFlipEvents, true);
 				
 			} else {
 				flipbookContainer.style.transformOrigin = '0 0';
@@ -823,12 +824,13 @@ async function initFlipbook() {
 				flipbookContainer.style.width = `${baseWidth * zoomLevel}px`;
 				flipbookContainer.style.height = `${baseHeight * zoomLevel}px`;
 				flipbookContainer.style.margin = '0';
-				// Zoom devam ettiği sürece kütüphanenin dokunmayı yutmasını engellemeye devam et
-				flipbookContainer.style.pointerEvents = 'none';
-				const allChildren = flipbookContainer.querySelectorAll('*');
-				allChildren.forEach(child => {
-					child.style.pointerEvents = 'none';
-				});
+				// 🔑 SENİN EKLENTİN: Sayfa çevirme engelini ve kaydırma modunu koruyoruz
+				flipbookContainer.addEventListener('touchstart', blockFlipEvents, true);
+				flipbookContainer.addEventListener('touchmove', blockFlipEvents, true);
+				flipbookContainer.addEventListener('mousedown', blockFlipEvents, true);
+				flipbookContainer.addEventListener('mousemove', blockFlipEvents, true);
+				
+				flipbookContainer.style.touchAction = 'pan-x pan-y';
 			}
 		}
    });
@@ -857,6 +859,7 @@ async function initFlipbook() {
         e.currentTarget.classList.toggle('active');
         const isSelectedMode = e.currentTarget.classList.contains('active');
         
+		// PageFlip sayfa çevirme jestlerini kilitle / aç
         if (pageFlipInstance && pageFlipInstance.setting) {
             pageFlipInstance.setting.userPageChange = !isSelectedMode; 
             pageFlipInstance.setting.swipeDistance = isSelectedMode ? 0 : 30; 
@@ -871,10 +874,15 @@ async function initFlipbook() {
                 appContainer.addEventListener('mousedown', blockFlipEvents, true);
                 appContainer.addEventListener('mousemove', blockFlipEvents, true);
                 appContainer.addEventListener('touchstart', blockFlipEvents, true);
+				appContainer.addEventListener('touchmove', blockFlipEvents, true);
+				appContainer.addEventListener('touchend', blockFlipEvents, true);   // 🔑 Eklendi
+				appContainer.addEventListener('touchcancel', blockFlipEvents, true); // 🔑 Eklendi
             }
+			// 🔑 2. METİN KATMANLARINI ÖNE ÇIKARMA VE DOKUNULABİLİR YAPMA
             textLayers.forEach(layer => {
-                layer.style.pointerEvents = 'auto';
+                layer.style.setProperty('pointer-events', 'auto', 'important');
                 layer.style.userSelect = 'text';
+				layer.style.webkitUserSelect = 'text'; // Mobil WebView kilit
                 layer.style.zIndex = '9999';
                 layer.style.opacity = '1'; 
             });
@@ -885,10 +893,14 @@ async function initFlipbook() {
                 appContainer.removeEventListener('mousedown', blockFlipEvents, true);
                 appContainer.removeEventListener('mousemove', blockFlipEvents, true);
                 appContainer.removeEventListener('touchstart', blockFlipEvents, true);
+				appContainer.removeEventListener('touchmove', blockFlipEvents, true);
+				appContainer.removeEventListener('touchend', blockFlipEvents, true);
+				appContainer.removeEventListener('touchcancel', blockFlipEvents, true);
             }
             textLayers.forEach(layer => {
-                layer.style.pointerEvents = 'none';
+                layer.style.setProperty('pointer-events', 'none');
                 layer.style.userSelect = 'none';
+				layer.style.webkitUserSelect = 'none';
                 layer.style.zIndex = ''; 
                 layer.style.opacity = ''; 
             });

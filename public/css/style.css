@@ -57,32 +57,33 @@ body {
 .main-content {
 	flex: 1;
     position: relative;
-    overflow: auto !important; /* 🔑 AUTO YERİNE SCROLL: Android'i kaydırma çubuğu basmaya zorlar */
+    overflow: scroll !important; /* 🔑 AUTO YERİNE SCROLL: Android'i kaydırma çubuğu basmaya zorlar */
 	-webkit-overflow-scrolling: touch !important; /* 🔑 MOBİL SÜRÜKLEMEYİ YAĞ GİBİ AKICI YAPAR */
     width: 100%;
     height: 100%;
     display: block !important; /* 🔑 FLEX ÇAKIŞMASI BİTTİ: Sayfanın yukarı kayıp fırlamasını önler */
+	padding: 0 !important;
     box-sizing: border-box;
 	overscroll-behavior: contain !important; /* 🔑 MOBİLDE SAYFANIN DİŞARIYA KAÇMASINI KESER */
-	padding: 0 !important;
+	
 }
 
 /* 🔑 MOBİL SCROLLBAR'LARIN HER KOŞULDA GÖRÜNÜR OLMASI */
 .main-content::-webkit-scrollbar {
 	-webkit-appearance: none !important;
     display: block !important;
-    width: 12px !important;
-    height: 12px !important;
+    width: 10px !important;
+    height: 10px !important;
 }
 
 .main-content::-webkit-scrollbar-thumb {
 	background-color: rgba(0, 0, 0, 0.6) !important;
-    border-radius: 6px !important;
+    border-radius: 5px !important;
 	border: 2px solid #ffffff !important;
 }
 
 .main-content::-webkit-scrollbar-track {
-    background-color: rgba(0, 0, 0, 0.08) !important;
+    background-color: rgba(0, 0, 0, 0.05) !important;
 }
 
 .flipbook {
@@ -113,7 +114,6 @@ body {
     max-width: 100% !important;            /* 🔑 MİZANPAJ FIX: Mobil ekranda sayfa oranlarını kırmaması için */
     max-height: 100% !important;
     overflow: hidden !important;
-    transform-origin: 0 0 !important;       /* Büyüme yönü kilitlendi */
     outline: none !important;
 }
 
