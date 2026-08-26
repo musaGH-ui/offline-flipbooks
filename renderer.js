@@ -772,6 +772,14 @@ async function initFlipbook() {
 	let baseWidth = 0;
 	let baseHeight = 0;
 	
+	// 🔑 ZOOM VE İÇERİK KAYDIRMA İÇİN AKILLI EVENT ENGELLEYİCİ
+	function handleZoomTouchEvents(e) {
+		if (zoomLevel > 1.0) {
+			// StPageFlip kütüphanesinin ve alt katmanların olayı yakalayıp sayfa çevirmesini engeller
+			e.stopPropagation();
+		}
+	}
+	// 🔍 ZOOM IN
     document.getElementById('btn-zoom-in').addEventListener('click', () => {
         if (zoomLevel < 3.2) {
 			// İlk zoom tıkında orijinal 1x boyutları hafızaya sabitliyoruz
@@ -781,27 +789,34 @@ async function initFlipbook() {
 			}
 			zoomLevel += 0.20;
 			
+			// 1. Sol-Üst Çivileme
 			flipbookContainer.style.transformOrigin = '0 0';
 			flipbookContainer.style.transform = `scale(${zoomLevel})`;
 			flipbookContainer.style.margin = '0';
 			
-			// 🔑 1. SCROLL-BAR ALANI: Taşmayı tetiklemek için genişliği Zoom oranıyla genişletiyoruz
+			// 2. Kapsayıcı boyutunu büyüt (Scrollbar alanını genişletir)
 			flipbookContainer.style.width = `${baseWidth * zoomLevel}px`;
 			flipbookContainer.style.height = `${baseHeight * zoomLevel}px`;
-			// 🔑 NİHAİ ÇÖZÜM (Sadece StPageFlip Ayarı): 
-			// Kütüphaneye "Zoom yaptım, artık dokunarak sayfa çevirmeyi durdur" diyoruz.
-			// Bu tek satır sayfa çevirmeyi kapatır, parmak sürüklemesini ekranda kaydırmaya devreder!
+			
+			// 🔑 KÜTÜPHANE SAYFA ÇEVİRMESİNİ KODLA KİLİTLE
 			if (pageFlipInstance && pageFlipInstance.setting) {
 				pageFlipInstance.setting.userPageChange = false;
 				pageFlipInstance.setting.swipeDistance = 0;
 			}
-
-			// Dokunmatik ekranda kaydırma (Pan) modunu açıyoruz
+			
+			// 🔑 TEŞHİSİN DOĞRULANDI: Capture fazında (true) olayları kesiyoruz!
+			flipbookContainer.addEventListener('touchstart', handleZoomTouchEvents, true);
+			flipbookContainer.addEventListener('touchmove', handleZoomTouchEvents, true);
+			flipbookContainer.addEventListener('touchend', handleZoomTouchEvents, true);
+			flipbookContainer.addEventListener('mousedown', handleZoomTouchEvents, true);
+			flipbookContainer.addEventListener('mousemove', handleZoomTouchEvents, true);
+			// Dokunmatik kaydırma (Pan) kilitleri
 			flipbookContainer.style.touchAction = 'pan-x pan-y';
 			
 		}
     });
-
+	
+	// 🔍 ZOOM OUT
     document.getElementById('btn-zoom-out').addEventListener('click', () => {
         if (zoomLevel > 1.0) {
 			zoomLevel -= 0.20;
@@ -820,7 +835,12 @@ async function initFlipbook() {
 					pageFlipInstance.setting.userPageChange = true;
 					pageFlipInstance.setting.swipeDistance = 30;
 				}
-				
+				// 🔑 Event dinleyicilerini temizle (Sayfa çevirme jestleri geri gelsin)
+				flipbookContainer.removeEventListener('touchstart', handleZoomTouchEvents, true);
+				flipbookContainer.removeEventListener('touchmove', handleZoomTouchEvents, true);
+				flipbookContainer.removeEventListener('touchend', handleZoomTouchEvents, true);
+				flipbookContainer.removeEventListener('mousedown', handleZoomTouchEvents, true);
+				flipbookContainer.removeEventListener('mousemove', handleZoomTouchEvents, true);
 			} else {
 				flipbookContainer.style.transformOrigin = '0 0';
 				flipbookContainer.style.transform = `scale(${zoomLevel})`;
@@ -832,6 +852,14 @@ async function initFlipbook() {
 					pageFlipInstance.setting.userPageChange = false;
 					pageFlipInstance.setting.swipeDistance = 0;
 				}
+				
+				// Hâlâ zoom'lu durumdaysa kilitleri aktif tut
+				flipbookContainer.addEventListener('touchstart', handleZoomTouchEvents, true);
+				flipbookContainer.addEventListener('touchmove', handleZoomTouchEvents, true);
+				flipbookContainer.addEventListener('touchend', handleZoomTouchEvents, true);
+				flipbookContainer.addEventListener('mousedown', handleZoomTouchEvents, true);
+				flipbookContainer.addEventListener('mousemove', handleZoomTouchEvents, true);
+				
 				flipbookContainer.style.touchAction = 'pan-x pan-y'
 			}
 		}
