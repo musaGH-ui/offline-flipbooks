@@ -788,14 +788,17 @@ async function initFlipbook() {
 			// 🔑 1. SCROLL-BAR ALANI: Taşmayı tetiklemek için genişliği Zoom oranıyla genişletiyoruz
 			flipbookContainer.style.width = `${baseWidth * zoomLevel}px`;
 			flipbookContainer.style.height = `${baseHeight * zoomLevel}px`;
-			// 🔑 NİHAİ ÇÖZÜM: Var olan blockFlipEvents fonksiyonunu Capture fazında (true) bağlıyoruz!
-			// Parmağınla kaydırdığında StPageFlip bunu sayfa çevirme sanamaz!
-			flipbookContainer.addEventListener('touchstart', blockFlipEvents, true);
-			flipbookContainer.addEventListener('touchmove', blockFlipEvents, true);
-			flipbookContainer.addEventListener('mousedown', blockFlipEvents, true);
-			flipbookContainer.addEventListener('mousemove', blockFlipEvents, true);
-        
+			// 🔑 NİHAİ ÇÖZÜM (Sadece StPageFlip Ayarı): 
+			// Kütüphaneye "Zoom yaptım, artık dokunarak sayfa çevirmeyi durdur" diyoruz.
+			// Bu tek satır sayfa çevirmeyi kapatır, parmak sürüklemesini ekranda kaydırmaya devreder!
+			if (pageFlipInstance && pageFlipInstance.setting) {
+				pageFlipInstance.setting.userPageChange = false;
+				pageFlipInstance.setting.swipeDistance = 0;
+			}
+
+			// Dokunmatik ekranda kaydırma (Pan) modunu açıyoruz
 			flipbookContainer.style.touchAction = 'pan-x pan-y';
+			
 		}
     });
 
@@ -812,11 +815,11 @@ async function initFlipbook() {
 				flipbookContainer.style.height = '';
 				flipbookContainer.style.margin = '0 auto'; // Merkeze al
 				flipbookContainer.style.touchAction = 'manipulation';
-				// 🔑 Normal boyuta (1.0) dönünce olay kilitlerini kaldırıyoruz (Sayfa çevirme tekrar açılır)
-				flipbookContainer.removeEventListener('touchstart', blockFlipEvents, true);
-				flipbookContainer.removeEventListener('touchmove', blockFlipEvents, true);
-				flipbookContainer.removeEventListener('mousedown', blockFlipEvents, true);
-				flipbookContainer.removeEventListener('mousemove', blockFlipEvents, true);
+				// 🔑 1.0 SEVİYESİNDE SAYFA ÇEVİRMEYİ REFREŞ ET (Sayfa çevirme tekrar açılır)
+				if (pageFlipInstance && pageFlipInstance.setting) {
+					pageFlipInstance.setting.userPageChange = true;
+					pageFlipInstance.setting.swipeDistance = 30;
+				}
 				
 			} else {
 				flipbookContainer.style.transformOrigin = '0 0';
@@ -824,13 +827,12 @@ async function initFlipbook() {
 				flipbookContainer.style.width = `${baseWidth * zoomLevel}px`;
 				flipbookContainer.style.height = `${baseHeight * zoomLevel}px`;
 				flipbookContainer.style.margin = '0';
-				// 🔑 SENİN EKLENTİN: Sayfa çevirme engelini ve kaydırma modunu koruyoruz
-				flipbookContainer.addEventListener('touchstart', blockFlipEvents, true);
-				flipbookContainer.addEventListener('touchmove', blockFlipEvents, true);
-				flipbookContainer.addEventListener('mousedown', blockFlipEvents, true);
-				flipbookContainer.addEventListener('mousemove', blockFlipEvents, true);
-				
-				flipbookContainer.style.touchAction = 'pan-x pan-y';
+				// Zoom devam ettiği sürece sayfa çevirmeyi kapalı tut
+				if (pageFlipInstance && pageFlipInstance.setting) {
+					pageFlipInstance.setting.userPageChange = false;
+					pageFlipInstance.setting.swipeDistance = 0;
+				}
+				flipbookContainer.style.touchAction = 'pan-x pan-y'
 			}
 		}
    });
