@@ -790,31 +790,48 @@ async function initFlipbook() {
 			flipbookContainer.style.height = `${baseHeight * zoomLevel}px`;
 			// 🔑 2. MOBİL DOKUNMATİK KİLİT: Sürüklemenin sayfa çevirmesini değil, pan (kaydırma) yapmasını sağlar
 			flipbookContainer.style.touchAction = 'pan-x pan-y';
+			
+			// İçteki tüm sayfa katmanlarına da kaydırma izni verilir
+			const pageElements = flipbookContainer.querySelectorAll('.page, .st-page-flip, canvas');
+			pageElements.forEach(el => {
+				el.style.touchAction = 'pan-x pan-y';
+			});
 		}
     });
 
     document.getElementById('btn-zoom-out').addEventListener('click', () => {
         if (zoomLevel > 1.0) {
-        zoomLevel -= 0.20;
-        if (zoomLevel < 1.0) zoomLevel = 1.0;
-
-        if (zoomLevel === 1.0) {
-            // Normal boyuta dönünce stilleri sıfırla ve merkeze al
-            flipbookContainer.style.transform = 'none';
-            flipbookContainer.style.transformOrigin = 'center center';
-			flipbookContainer.style.width = '';
-            flipbookContainer.style.height = '';
-			// Dokunmatik sayfa çevirme jestini normale döndür
-            flipbookContainer.style.touchAction = 'manipulation';
-        } else {
-            flipbookContainer.style.transformOrigin = '0 0';
-            flipbookContainer.style.transform = `scale(${zoomLevel})`;
-			flipbookContainer.style.width = `${baseWidth * zoomLevel}px`;
-            flipbookContainer.style.height = `${baseHeight * zoomLevel}px`;
-            flipbookContainer.style.touchAction = 'pan-x pan-y';
+			zoomLevel -= 0.20;
+			if (zoomLevel < 1.0) zoomLevel = 1.0;
+			
+			const pageElements = flipbookContainer.querySelectorAll('.page, .st-page-flip, canvas');
+			
+			if (zoomLevel === 1.0) {
+				// Normal boyuta dönünce stilleri sıfırla ve merkeze al
+				flipbookContainer.style.transform = 'none';
+				flipbookContainer.style.transformOrigin = 'center center';
+				flipbookContainer.style.width = '';
+				flipbookContainer.style.height = '';
+				flipbookContainer.style.margin = '0 auto'; // Merkeze al
+				// Dokunmatik sayfa çevirme jestini normale döndür
+				flipbookContainer.style.touchAction = 'manipulation';
+				
+				pageElements.forEach(el => {
+					el.style.touchAction = 'manipulation';
+				});
+			} else {
+				flipbookContainer.style.transformOrigin = '0 0';
+				flipbookContainer.style.transform = `scale(${zoomLevel})`;
+				flipbookContainer.style.width = `${baseWidth * zoomLevel}px`;
+				flipbookContainer.style.height = `${baseHeight * zoomLevel}px`;
+				flipbookContainer.style.margin = '0';
+				flipbookContainer.style.touchAction = 'pan-x pan-y';
+				pageElements.forEach(el => {
+					el.style.touchAction = 'pan-x pan-y';
+				});
 			}
 		}
-    });
+   });
     
     document.getElementById('btn-fullscreen').addEventListener('click', () => {
         if (!document.fullscreenElement) {
